@@ -19,81 +19,157 @@
   </style>
 </head>
 <body>
-  <canvas id="tankCanvas" width="400" height="300"></canvas>
+  <canvas id="tankCanvas" width="700" height="700"></canvas>
 
   <script>
     // Λήψη του canvas και του context
     const canvas = document.getElementById("tankCanvas");
     const ctx = canvas.getContext("2d");
 
-
-    options = {
-        position: {x: 200, y: 200},
-        tankBodyFillStyle: "#4c8c4a",
-        tankTowerFillStyle: "#3e6d3b",
-        tankCanonFilleStyle: "#2b4b29",
-        tankWheelsFillStyle: "red",
-        tankWheelTracksFillStyle: "#3a3a3a",
-        tankSize: 10
+    game = {
+      //frame: 0
     }
 
+    /////////////////////////////////////////////////////////
 
+    function Tank(ctx, options){
+        this.ctx = ctx;
+        this.position = this.position || {}
+        this.position.x = options.position.x || 200,
+        this.position.y = options.position.y || 130,
+        this.bodyFillStyle = "#4c8c4a",
+        this.towerFillStyle = "#3e6d3b",
+        this.canonFilleStyle = "#2b4b29",
+        this.wheelsFillStyle = "red",
+        this.wheelTracksFillStyle = "yellow",
+        this.wheelLineNum = 10,
+        this.size = 10, 
+        this.speed = 1,
+        this.frame = 0,
+        this.comp = {
 
-   function renderTank(ctx, options){
-    const size = options.tankSize;
-    const pos = options.position;
+        }
+        this.angle = 90;
+    }
 
-    // Σχεδίαση του σώματος του τανκ, περιστραμμένο οριζόντια
-    ctx.fillStyle = options.tankBodyFillStyle; // Πράσινο σκούρο χρώμα για το σώμα
-    
-    ctx.fillRect(pos.x-7*size, pos.y-3.5*size, 14*size, 7*size); // Οριζόντιο ορθογώνιο για το σώμα του τανκ
-//130 - 270
-//70 -180
-    // Σχεδίαση του πύργου στο κέντρο του σώματος
-  ctx.fillStyle = options.tankTowerFillStyle; // Πιο σκούρο πράσινο για τον πύργο
-  ctx.beginPath();
+    Tank.prototype.init = function(){
+      this.comp.fullSize = 14*this.size;
+      this.comp.halfSize = 7*this.size;
+      this.comp.lineDist = (this.comp.fullSize) / this.wheelLineNum;
+      this.frame = Math.floor(Math.random()*this.comp.lineDist);
+    } 
+
+    Tank.prototype.render = function() {
    
-   ctx.arc(pos.x, pos.y, 2*size, 0, Math.PI * 2); // Κύκλος για τον πύργο
-    
-    ctx.fill();
+      const size = this.size;
+      const pos = this.position;
+      const ctx = this.ctx;
 
-  //   // Σχεδίαση του κανονιού από το κέντρο του πύργου προς τα δεξιά
-    ctx.fillStyle = options.tankCanonFilleStyle; // Ακόμα πιο σκούρο πράσινο για το κανόνι
-    ctx.fillRect(pos.x+size*2, pos.y-size*.5, 6*size, size); // Κανόνι που εκτείνεται από το κέντρο του πύργου προς τα δεξιά
+      // Σχεδίαση του σώματος του τανκ
+      ctx.fillStyle = this.bodyFillStyle;
+      ctx.fillRect(pos.x - this.comp.halfSize, pos.y - 3.5 * size, this.comp.fullSize, this.comp.halfSize); // Οριζόντιο ορθογώνιο για το σώμα του τανκ
 
-  //   // Σχεδίαση των ερπυστριών (πάνω και κάτω από το σώμα)
-  //   ctx.fillStyle = options.tankWheelTracksFillStyle; // Γκρι χρώμα για τις ερπύστριες
-     ctx.fillRect(pos.x-7*size, pos.y-5.5*size, 14*size, 2*size); // Άνω ερπύστρια
-     ctx.fillRect(pos.x-7*size, pos.y+3.5*size, 14*size, 2*size); // Κάτω ερπύστρια
-
-    // Σχεδίαση τροχών στις ερπύστριες
-    ctx.fillStyle = options.tankWheelsFillStyle; // Χρώμα για τους τροχούς
-    for (let i = 0; i < 5; i++) {
-      // Τροχοί άνω ερπύστριας
+      // Σχεδίαση του πύργου
+      ctx.fillStyle = this.towerFillStyle;
       ctx.beginPath();
-      ctx.arc(pos.x-6.6*size + i * size*3, pos.y-4.5*size, .8*size, 0, Math.PI * 2); // Τροχοί στην άνω ερπύστρια
+      ctx.arc(pos.x, pos.y, 2 * size, 0, Math.PI * 2);
       ctx.fill();
 
-      // Τροχοί κάτω ερπύστριας
-      ctx.beginPath();
-      ctx.arc(pos.x-6.6*size + i * size*3, pos.y+4.5*size, .8*size, 0, Math.PI * 2); // Τροχοί στην κάτω ερπύστρια
-      ctx.fill();
 
+      // Σχεδίαση του κανονιού
+      ctx.fillStyle = this.canonFilleStyle;
+      ctx.fillRect(pos.x + size * 2, pos.y - size * 0.5, 6 * size, size);
+
+      // Σχεδίαση των ερπυστριών
+      ctx.fillStyle = this.wheelTracksFillStyle;
+      ctx.fillRect(pos.x - this.comp.halfSize, pos.y - 5.5 * size, this.comp.fullSize, 2 * size); // Άνω ερπύστρια
+      ctx.fillRect(pos.x - this.comp.halfSize, pos.y + 3.5 * size, this.comp.fullSize, 2 * size); // Κάτω ερπύστρια
+
+      // Σχεδίαση τροχών στις ερπυστριές
+      ctx.fillStyle = this.wheelsFillStyle;
+
+      const lineDist = (this.comp.fullSize) / this.wheelLineNum;
+      const frame = this.frame % lineDist;
+
+      for (let i = 0; i < this.wheelLineNum; i++) {
+        ctx.beginPath();
+        ctx.moveTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y - 3.5 * size, 0.8 * size);
+        ctx.lineTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y - 5.5 * size, 0.8 * size)
+        ctx.stroke()
+
+        // Τροχοί κάτω ερπυστριας
+        ctx.beginPath();
+        ctx.moveTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y + 3.5 * size, 0.8 * size);
+        ctx.lineTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y + 5.5 * size, 0.8 * size)
+        ctx.stroke()
+        
+  
+      }
+       
+      ctx.restore(); // Restore the context to remove clipping region
+      this.frame+=1;
     }
 
-    //ctx.fillRect(130, 135, 140, 130);//x,y,w,h
-//200, 200
-   }
+    Tank.prototype.move = function(){
+      //this.save();
+      ctx.save();
 
-   renderTank(ctx, options);
+// Move the rotation point to the rectangle's center
+ctx.translate(x, y);
+
+// Rotate the canvas
+ctx.rotate(angle);
+
+      this.position.y+= Math.cos(this.angle);
+      this.position.x+= Math.sin(this.angle);
+      this.restore();
+    }
 
 
 
-   setInterval(()=>{
-    renderTank(ctx, options);
-    options.x+=1;
-   }, 200);
 
+    /////////////////////////////////////////////////////////////
+    options = {
+        position: {x: 200, y: 70},
+        bodyFillStyle: "#4c8c4a",
+        towerFillStyle: "#3e6d3b",
+        canonFilleStyle: "#2b4b29",
+        wheelsFillStyle: "red",
+        wheelTracksFillStyle: "yellow",
+        wheelLineNum: 5,
+        size: 5, 
+        speed: 1,
+        frame: 0
+    }
+
+    let tanks = [];
+
+    for(let i=0;  i<5; i+=1){
+     
+      //debugger;
+      let tank =  new Tank(ctx, options);
+      options.position.y+= 130;
+      tank.init();
+      tanks.push(tank);
+    }
+
+    setInterval(function() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // for(let i=0;  i<5; i+=1){
+      //   tanks[i].render();
+      // }
+
+      tanks.forEach((t)=>{
+        t.move();
+        t.render()
+       //console.log(tanks)
+      });
+      //renderTank(ctx, options);
+      // tank.render();
+      // options.position.x += options.speed;
+      // options.frame+=1;
+    }, 20);
 
 
   </script>
