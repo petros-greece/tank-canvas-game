@@ -24,6 +24,9 @@
 <body>
   <canvas id="tankCanvas" width="700" height="700"></canvas>
 
+
+  <button id="shoot">shoot</button>
+
   <script>
     // Λήψη του canvas και του context
     const canvas = document.getElementById("tankCanvas");
@@ -40,24 +43,29 @@
 
       // Set up position with default values
       this.position = this.position || {};
-      this.position.x = options.position?.x ?? 50;  // Default x position
-      this.position.y = options.position?.y ?? 130; // Default y position
-
+      this.position.x = options.position.x;  // Default x position
+      this.position.y = options.position.y; // Default y position
+      this.moveToPos = options.moveToPos || {};
+      this.moveToPos.x = options.moveToPos.x;
+      this.moveToPos.y = options.moveToPos.y;
       // Assign other tank properties with option values or defaults
       this.bodyFillStyle = options.bodyFillStyle ?? "#4c8c4a";
       this.towerFillStyle = options.towerFillStyle ?? "#3e6d3b";
       this.canonFillStyle = options.canonFillStyle ?? "#2b4b29";
       this.wheelsFillStyle = options.wheelsFillStyle ?? "red";
       this.wheelTracksFillStyle = options.wheelTracksFillStyle ?? "yellow";
+      this.rangeColor = options.rangeColor ?? "blue";
 
       // Assign defaults for size, speed, angles, and other parameters
       this.wheelTracksLineNum = options.wheelTracksLineNum ?? 10;
-      this.size = options.size ?? 30;
+      this.size = options.size ?? 10;
       this.speed = options.speed ?? 1;
+      this.range = options.range ?? 250;
       this.angle = options.angle ?? 10;
-      this.cannonAngle = options.cannonAngle ?? 33;
+      this.cannonAngle = options.cannonAngle ?? 11;
       this.frame = 0;
-
+      this.selected = false;
+      this.stopped = false;
       // Component object for calculations or stored dimensions
       this.comp = {};
     }
@@ -74,6 +82,14 @@
 
       const size = this.size;
       const ctx = this.ctx;
+
+      if(this.selected) {
+        ctx.fillStyle = this.towerFillStyle;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.range, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
 
       // Draw tank body
       ctx.fillStyle = this.bodyFillStyle;
@@ -93,28 +109,15 @@
 
     }
 
-    Tank.prototype.move = function () {
-      const ctx = this.ctx;
-      ctx.save();
-      ctx.translate(this.position.x, this.position.y);
-      ctx.rotate(this.angle * (Math.PI / 180));
-      this.render();
-      ctx.restore();
-      // Update the tank's position based on angle
-      this.position.x += Math.cos(this.angle * (Math.PI / 180)) * this.speed;
-      this.position.y += Math.sin(this.angle * (Math.PI / 180)) * this.speed;
-      this.frame += 1;
-    }
-
     Tank.prototype.renderCannon = function (ctx, size) {
-      ctx.save();
-      ctx.rotate(this.cannonAngle * (Math.PI / 180));
+      //ctx.save();
+      //ctx.rotate(this.cannonAngle * (Math.PI / 180));
       ctx.fillStyle = this.canonFilleStyle;
       ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
-      ctx.restore();
+      //ctx.restore();
     }
 
-    Tank.prototype.renderTracks = function(ctx, size){
+    Tank.prototype.renderTracks = function (ctx, size) {
       // Draw tracks
       ctx.fillStyle = this.wheelTracksFillStyle;
       ctx.fillRect(-this.comp.halfSize, -5.5 * size, this.comp.fullSize, 2 * size); // Upper track
@@ -135,93 +138,213 @@
       ctx.stroke();
     }
 
-    Tank.prototype.moveTo = function (targetX, targetY) {
-  // Calculate the angle to the target point
-  const dx = targetX - this.position.x;
-  const dy = targetY - this.position.y;
-  const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert to degrees
-  const distance = Math.sqrt(dx * dx + dy * dy);
+    Tank.prototype.moveTo = function () {
+      
+      const dx = this.moveToPos.x - this.position.x;
+      const dy = this.moveToPos.y - this.position.y;
+      const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Target angle in degrees
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-  // Determine shortest rotation direction
-  const angleDifference = (targetAngle - this.angle + 360) % 360;
-  const rotationSpeed = 2; // Adjust rotation speed for smoother rotation
+      // Calculate shortest angle difference (clockwise or counterclockwise)
+      let angleDifference = (targetAngle - this.angle + 360) % 360;
+      if (angleDifference > 180) angleDifference -= 360; // Adjust to the shortest direction
+
+      const rotationSpeed = 1; // Speed of rotation
+      const angleTolerance = 1; // Angle tolerance to prevent oscillation
+
+      console.log(angleDifference)
+      // Rotate gradually toward the target angle if not aligned
+      if (Math.abs(angleDifference) >= angleTolerance && distance > this.speed) {
+        if (angleDifference > 0) {
+          this.angle += Math.min(rotationSpeed, angleDifference); // Rotate clockwise
+        } else {
+          this.angle -= Math.min(rotationSpeed, -angleDifference); // Rotate counterclockwise
+        }
+        this.frame += 1;
+      }
+
+      // Move forward if aligned within tolerance of the target direction
+      if (Math.abs(angleDifference) <= angleTolerance && distance > this.speed) {
+        const moveSpeed = Math.min(this.speed, distance);
+        this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed;
+        this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed;
+        this.frame += 1;
+      }
+
+      this.draw(); 
+      
+    };
+
+
+    Tank.prototype.collide = function(otherTank) {
+      const dx = this.position.x - otherTank.position.x;
+      const dy = this.position.y - otherTank.position.y;
+      const collisionAngle = Math.atan2(dy, dx);
   
-  if (distance > this.speed*2) {
-    // Rotate the tank towards the target angle gradually
-    if (angleDifference > 0 && angleDifference < 180) {
-      this.angle += Math.min(rotationSpeed, angleDifference); // Rotate clockwise
-    } else if (angleDifference >= 180) {
-      this.angle -= Math.min(rotationSpeed, 360 - angleDifference); // Rotate counterclockwise
+
+
+      //this.position.x -= Math.sin( otherTank.angle * (Math.PI / 180)) * otherTank.speed;
+      //this.position.y -= Math.cos( otherTank.angle * (Math.PI / 180)) * otherTank.speed; 
+
+      otherTank.position.x += Math.sin( collisionAngle) * this.speed*2;
+      otherTank.position.y += Math.cos( collisionAngle) * this.speed*2; 
+      //this.moveTo.y  =  this.position.y
+      this.draw(); 
+     
     }
 
-    // Move forward in the current angle direction
-    const moveSpeed = Math.min(this.speed, distance); // Reduce speed if close to target
-    this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed;
-    this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed;
 
-  } else {
-    // Snap to target if close enough
-    this.position.x = targetX;
-    this.position.y = targetY;
-  }
+    Tank.prototype.draw = function(){
+      // Draw tank with the updated position and angle
+      const ctx = this.ctx;
+      ctx.save();
+      ctx.translate(this.position.x, this.position.y);
+      ctx.rotate(this.angle * (Math.PI / 180));
+      this.render();
+      ctx.restore();
+    }
 
-  // Draw tank with the updated position and angle
-  const ctx = this.ctx;
-  ctx.save();
-  ctx.translate(this.position.x, this.position.y);
-  ctx.rotate(this.angle * (Math.PI / 180));
-  this.render();
-  ctx.restore();
-};
+    Tank.prototype.checkIfClicked = function (position) {
+      const size = this.size;
 
+      // Tank dimensions centered on its position
+      const halfWidth = this.comp.fullSize;
+      const halfHeight = 7 * size;
+
+      // Step 1: Translate the click position to the tank's local coordinate system
+      const dx = position.x - this.position.x;
+      const dy = position.y - this.position.y;
+
+      // Step 2: Rotate the click point in the opposite direction of the tank's rotation
+      const angleRad = -this.angle * (Math.PI / 180); // Convert angle to radians
+      const rotatedX = dx * Math.cos(angleRad) - dy * Math.sin(angleRad);
+      const rotatedY = dx * Math.sin(angleRad) + dy * Math.cos(angleRad);
+
+      // Step 3: Check if the rotated click coordinates fall within the tank's rectangular boundaries
+      const isWithinBounds = (
+        rotatedX >= -halfWidth &&
+        rotatedX <= halfWidth &&
+        rotatedY >= -halfHeight &&
+        rotatedY <= halfHeight
+      );
+
+      return isWithinBounds; // Returns true if within bounds, false otherwise
+    };
+
+    Tank.prototype.checkCollision = function (otherTank) {
+      const dx = this.position.x - otherTank.position.x;
+      const dy = this.position.y - otherTank.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Collision threshold based on tank size
+      const collisionDistance = this.comp.halfSize + otherTank.comp.halfSize; // Adjust as needed based on tank size
+      return distance < Math.floor(collisionDistance);
+    };
+
+
+    /////////////////////////////////////////////////////////////////
+
+    function Missile(ctx, options = {}) {
+      // Set up position with default values
+      this.position = this.position || {};
+      this.position.x = options.position?.x ?? 50;  // Default x position
+      this.position.y = options.position?.y ?? 130; // Default y position
+    }
 
 
     /////////////////////////////////////////////////////////////
 
     options = {
-      position: { x: 25, y: 15 },
+
+      position: { x: 325, y: 215 },
+      moveToPos:  { x: 325, y: 215 },
+      //moveTo: { x: 300, y: 300 },
       bodyFillStyle: "#4c8c4a",
       towerFillStyle: "#3e6d3b",
       canonFilleStyle: "#2b4b29",
       wheelsFillStyle: "red",
       wheelTracksFillStyle: "yellow",
       wheelLineNum: 5,
-      size: 5,
+      size: 3,
       speed: 1,
-      frame: 0
+      frame: 0,
+      cannonAngle: 67,
+      range: 30
 
     }
 
     let tanks = [];
 
-    for (let i = 0; i < 1; i += 1) {
+    for (let i = 0; i < 2; i += 1) {
       //debugger;
-      let tank = new Tank(ctx, options);
-      options.position.y += 130;
+      let opts = JSON.parse(JSON.stringify(options));
+      opts.position.y += i*130;
+      opts.moveToPos.y += i*130;
+      let tank = new Tank(ctx, opts);
       tank.init();
       tanks.push(tank);
     }
 
-    x = 400;
-    y = 400;
+    selectedTankIndex = -1;
 
     setInterval(function () {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      tanks.forEach((t) => {
-        t.moveTo(x,y);
+      tanks.forEach((t, index) => {
+        if(selectedTankIndex > -1 && selectedTankIndex !==index && t.checkCollision(tanks[selectedTankIndex]) ){
+          //tanks[selectedTankIndex].collide();
+          tanks[selectedTankIndex].moveToPos = tanks[selectedTankIndex].position;
+          //t.collide(tanks[selectedTankIndex]);
+          tanks[selectedTankIndex].collide(t);
+          //t.moveToPos  = JSON.parse(JSON.stringify(t.position));
+          t.moveToPos = t.position; 
+        }
+
+        // if(selectedTankIndex > 0 && index !== selectedTankIndex && t.checkCollision(tanks[selectedTankIndex]) ){
+        //   tanks[selectedTankIndex].moveToPos  = JSON.parse(JSON.stringify(tanks[selectedTankIndex].position));
+        //   t.moveToPos  = JSON.parse(JSON.stringify(t.position));
+       
+        // }
+
+        // for (let i = 0; i < tanks.length; i += 1) {
+        //   if (i !== index && t.checkCollision(tanks[i])) {
+        //     t.moveToPos = t.position;
+        //     tanks[i].moveToPos = tanks[i].position;       
+        //   }
+        // }
+
+        t.moveTo();
       });
     }, 10);
 
+    
 
     canvas.addEventListener('click', (event) => {
       const rect = canvas.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
+      const position = {x: event.clientX - rect.left, y: event.clientY - rect.top}
+      let isClicked = false;
+      
+      tanks.forEach((t, index) => {
+        //t.stopped = false;
+        t.selected = false;
+        if (t.checkIfClicked(position) ) {    
+          selectedTankIndex = index;
+          isClicked = true;
+        }
+      });
 
-      x = mouseX, y = mouseY;
-
-     // alert({ x: mouseX, y: mouseY });
+      if(!isClicked){
+        //tanks[selectedTankIndex].move();
+        tanks[selectedTankIndex].moveToPos = position; // Move the selected tank to the clicked point
+      }
+     //else{
+      tanks[selectedTankIndex].selected = true;
+      //}
+    
     });
+
+
+
+
 
   </script>
 </body>
