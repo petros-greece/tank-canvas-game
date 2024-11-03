@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="el">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +14,13 @@
       margin: 0;
       background-color: #e0e0e0;
     }
+
     canvas {
       background-color: #ffffff;
     }
   </style>
 </head>
+
 <body>
   <canvas id="tankCanvas" width="700" height="700"></canvas>
 
@@ -32,146 +35,195 @@
 
     /////////////////////////////////////////////////////////
 
-    function Tank(ctx, options){
-        this.ctx = ctx;
-        this.position = this.position || {}
-        this.position.x = options.position.x || 200,
-        this.position.y = options.position.y || 130,
-        this.bodyFillStyle = "#4c8c4a",
-        this.towerFillStyle = "#3e6d3b",
-        this.canonFilleStyle = "#2b4b29",
-        this.wheelsFillStyle = "red",
-        this.wheelTracksFillStyle = "yellow",
-        this.wheelLineNum = 10,
-        this.size = 10, 
-        this.speed = 1,
-        this.frame = 0,
-        this.comp = {
+    function Tank(ctx, options = {}) {
+      this.ctx = ctx;
 
-        }
-        this.angle = 90;
+      // Set up position with default values
+      this.position = this.position || {};
+      this.position.x = options.position?.x ?? 50;  // Default x position
+      this.position.y = options.position?.y ?? 130; // Default y position
+
+      // Assign other tank properties with option values or defaults
+      this.bodyFillStyle = options.bodyFillStyle ?? "#4c8c4a";
+      this.towerFillStyle = options.towerFillStyle ?? "#3e6d3b";
+      this.canonFillStyle = options.canonFillStyle ?? "#2b4b29";
+      this.wheelsFillStyle = options.wheelsFillStyle ?? "red";
+      this.wheelTracksFillStyle = options.wheelTracksFillStyle ?? "yellow";
+
+      // Assign defaults for size, speed, angles, and other parameters
+      this.wheelTracksLineNum = options.wheelTracksLineNum ?? 10;
+      this.size = options.size ?? 30;
+      this.speed = options.speed ?? 1;
+      this.angle = options.angle ?? 10;
+      this.cannonAngle = options.cannonAngle ?? 33;
+      this.frame = 0;
+
+      // Component object for calculations or stored dimensions
+      this.comp = {};
     }
 
-    Tank.prototype.init = function(){
-      this.comp.fullSize = 14*this.size;
-      this.comp.halfSize = 7*this.size;
-      this.comp.lineDist = (this.comp.fullSize) / this.wheelLineNum;
-      this.frame = Math.floor(Math.random()*this.comp.lineDist);
-    } 
+    Tank.prototype.init = function () {
+      this.comp.fullSize = 14 * this.size;
+      this.comp.halfSize = 7 * this.size;
+      this.comp.isLockedDir = false;
+      this.comp.lineDist = (this.comp.fullSize) / this.wheelTracksLineNum;
+      this.frame = Math.floor(Math.random() * this.comp.lineDist);
+    }
 
-    Tank.prototype.render = function() {
-   
+    Tank.prototype.render = function () {
+
       const size = this.size;
-      const pos = this.position;
       const ctx = this.ctx;
 
-      // Σχεδίαση του σώματος του τανκ
+      // Draw tank body
       ctx.fillStyle = this.bodyFillStyle;
-      ctx.fillRect(pos.x - this.comp.halfSize, pos.y - 3.5 * size, this.comp.fullSize, this.comp.halfSize); // Οριζόντιο ορθογώνιο για το σώμα του τανκ
+      ctx.fillRect(-this.comp.halfSize, -3.5 * size, this.comp.fullSize, this.comp.halfSize);
 
-      // Σχεδίαση του πύργου
+      // Draw tank tower
       ctx.fillStyle = this.towerFillStyle;
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, 2 * size, 0, Math.PI * 2);
+      ctx.arc(0, 0, 2 * size, 0, Math.PI * 2);
       ctx.fill();
 
+      // Draw tracks
+      this.renderTracks(ctx, this.size);
 
-      // Σχεδίαση του κανονιού
+      // Draw cannon
+      this.renderCannon(ctx, this.size);
+
+    }
+
+    Tank.prototype.move = function () {
+      const ctx = this.ctx;
+      ctx.save();
+      ctx.translate(this.position.x, this.position.y);
+      ctx.rotate(this.angle * (Math.PI / 180));
+      this.render();
+      ctx.restore();
+      // Update the tank's position based on angle
+      this.position.x += Math.cos(this.angle * (Math.PI / 180)) * this.speed;
+      this.position.y += Math.sin(this.angle * (Math.PI / 180)) * this.speed;
+      this.frame += 1;
+    }
+
+    Tank.prototype.renderCannon = function (ctx, size) {
+      ctx.save();
+      ctx.rotate(this.cannonAngle * (Math.PI / 180));
       ctx.fillStyle = this.canonFilleStyle;
-      ctx.fillRect(pos.x + size * 2, pos.y - size * 0.5, 6 * size, size);
+      ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
+      ctx.restore();
+    }
 
-      // Σχεδίαση των ερπυστριών
+    Tank.prototype.renderTracks = function(ctx, size){
+      // Draw tracks
       ctx.fillStyle = this.wheelTracksFillStyle;
-      ctx.fillRect(pos.x - this.comp.halfSize, pos.y - 5.5 * size, this.comp.fullSize, 2 * size); // Άνω ερπύστρια
-      ctx.fillRect(pos.x - this.comp.halfSize, pos.y + 3.5 * size, this.comp.fullSize, 2 * size); // Κάτω ερπύστρια
+      ctx.fillRect(-this.comp.halfSize, -5.5 * size, this.comp.fullSize, 2 * size); // Upper track
+      ctx.fillRect(-this.comp.halfSize, 3.5 * size, this.comp.fullSize, 2 * size); // Lower track
 
-      // Σχεδίαση τροχών στις ερπυστριές
+      // Draw wheels lines
       ctx.fillStyle = this.wheelsFillStyle;
-
-      const lineDist = (this.comp.fullSize) / this.wheelLineNum;
+      const lineDist = this.comp.lineDist;
       const frame = this.frame % lineDist;
 
-      for (let i = 0; i < this.wheelLineNum; i++) {
-        ctx.beginPath();
-        ctx.moveTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y - 3.5 * size, 0.8 * size);
-        ctx.lineTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y - 5.5 * size, 0.8 * size)
-        ctx.stroke()
-
-        // Τροχοί κάτω ερπυστριας
-        ctx.beginPath();
-        ctx.moveTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y + 3.5 * size, 0.8 * size);
-        ctx.lineTo(pos.x - this.comp.halfSize + (i * lineDist + frame), pos.y + 5.5 * size, 0.8 * size)
-        ctx.stroke()
-        
-  
+      ctx.beginPath();
+      for (let i = 0; i < this.wheelTracksLineNum; i++) {
+        ctx.moveTo(-this.comp.halfSize + (i * lineDist + frame), -3.5 * size);
+        ctx.lineTo(-this.comp.halfSize + (i * lineDist + frame), -5.5 * size);
+        ctx.moveTo(-this.comp.halfSize + (i * lineDist + frame), 3.5 * size);
+        ctx.lineTo(-this.comp.halfSize + (i * lineDist + frame), 5.5 * size);
       }
-       
-      ctx.restore(); // Restore the context to remove clipping region
-      this.frame+=1;
+      ctx.stroke();
     }
 
-    Tank.prototype.move = function(){
-      //this.save();
-      ctx.save();
+    Tank.prototype.moveTo = function (targetX, targetY) {
+  // Calculate the angle to the target point
+  const dx = targetX - this.position.x;
+  const dy = targetY - this.position.y;
+  const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert to degrees
+  const distance = Math.sqrt(dx * dx + dy * dy);
 
-// Move the rotation point to the rectangle's center
-ctx.translate(x, y);
-
-// Rotate the canvas
-ctx.rotate(angle);
-
-      this.position.y+= Math.cos(this.angle);
-      this.position.x+= Math.sin(this.angle);
-      this.restore();
+  // Determine shortest rotation direction
+  const angleDifference = (targetAngle - this.angle + 360) % 360;
+  const rotationSpeed = 2; // Adjust rotation speed for smoother rotation
+  
+  if (distance > this.speed*2) {
+    // Rotate the tank towards the target angle gradually
+    if (angleDifference > 0 && angleDifference < 180) {
+      this.angle += Math.min(rotationSpeed, angleDifference); // Rotate clockwise
+    } else if (angleDifference >= 180) {
+      this.angle -= Math.min(rotationSpeed, 360 - angleDifference); // Rotate counterclockwise
     }
 
+    // Move forward in the current angle direction
+    const moveSpeed = Math.min(this.speed, distance); // Reduce speed if close to target
+    this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed;
+    this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed;
+
+  } else {
+    // Snap to target if close enough
+    this.position.x = targetX;
+    this.position.y = targetY;
+  }
+
+  // Draw tank with the updated position and angle
+  const ctx = this.ctx;
+  ctx.save();
+  ctx.translate(this.position.x, this.position.y);
+  ctx.rotate(this.angle * (Math.PI / 180));
+  this.render();
+  ctx.restore();
+};
 
 
 
     /////////////////////////////////////////////////////////////
+
     options = {
-        position: {x: 200, y: 70},
-        bodyFillStyle: "#4c8c4a",
-        towerFillStyle: "#3e6d3b",
-        canonFilleStyle: "#2b4b29",
-        wheelsFillStyle: "red",
-        wheelTracksFillStyle: "yellow",
-        wheelLineNum: 5,
-        size: 5, 
-        speed: 1,
-        frame: 0
+      position: { x: 25, y: 15 },
+      bodyFillStyle: "#4c8c4a",
+      towerFillStyle: "#3e6d3b",
+      canonFilleStyle: "#2b4b29",
+      wheelsFillStyle: "red",
+      wheelTracksFillStyle: "yellow",
+      wheelLineNum: 5,
+      size: 5,
+      speed: 1,
+      frame: 0
+
     }
 
     let tanks = [];
 
-    for(let i=0;  i<5; i+=1){
-     
+    for (let i = 0; i < 1; i += 1) {
       //debugger;
-      let tank =  new Tank(ctx, options);
-      options.position.y+= 130;
+      let tank = new Tank(ctx, options);
+      options.position.y += 130;
       tank.init();
       tanks.push(tank);
     }
 
-    setInterval(function() {
+    x = 400;
+    y = 400;
+
+    setInterval(function () {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // for(let i=0;  i<5; i+=1){
-      //   tanks[i].render();
-      // }
-
-      tanks.forEach((t)=>{
-        t.move();
-        t.render()
-       //console.log(tanks)
+      tanks.forEach((t) => {
+        t.moveTo(x,y);
       });
-      //renderTank(ctx, options);
-      // tank.render();
-      // options.position.x += options.speed;
-      // options.frame+=1;
-    }, 20);
+    }, 10);
 
+
+    canvas.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      x = mouseX, y = mouseY;
+
+     // alert({ x: mouseX, y: mouseY });
+    });
 
   </script>
 </body>
+
 </html>
