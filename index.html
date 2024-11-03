@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tank Rotated 90 Degrees Right</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #e0e0e0;
+    }
+    canvas {
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="tankCanvas" width="400" height="300"></canvas>
+
+  <script>
+    // Λήψη του canvas και του context
+    const canvas = document.getElementById("tankCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Σχεδίαση του σώματος του τανκ, περιστραμμένο οριζόντια
+    ctx.fillStyle = "#4c8c4a"; // Πράσινο σκούρο χρώμα για το σώμα
+    ctx.fillRect(130, 155, 140, 90); // Οριζόντιο ορθογώνιο για το σώμα του τανκ
+
+    // Σχεδίαση του πύργου στο κέντρο του σώματος
+    ctx.fillStyle = "#3e6d3b"; // Πιο σκούρο πράσινο για τον πύργο
+    ctx.beginPath();
+    ctx.arc(200, 200, 20, 0, Math.PI * 2); // Κύκλος για τον πύργο
+    ctx.fill();
+
+    // Σχεδίαση του κανονιού από το κέντρο του πύργου προς τα δεξιά
+    ctx.fillStyle = "#2b4b29"; // Ακόμα πιο σκούρο πράσινο για το κανόνι
+    ctx.fillRect(220, 195, 60, 10); // Κανόνι που εκτείνεται από το κέντρο του πύργου προς τα δεξιά
+
+    // Σχεδίαση των ερπυστριών (πάνω και κάτω από το σώμα)
+    ctx.fillStyle = "#3a3a3a"; // Γκρι χρώμα για τις ερπύστριες
+    ctx.fillRect(130, 135, 140, 20); // Άνω ερπύστρια
+    ctx.fillRect(130, 245, 140, 20); // Κάτω ερπύστρια
+
+    // Σχεδίαση τροχών στις ερπύστριες
+    ctx.fillStyle = "#555555"; // Χρώμα για τους τροχούς
+    for (let i = 0; i < 5; i++) {
+      // Τροχοί άνω ερπύστριας
+      ctx.beginPath();
+      ctx.arc(145 + i * 30, 145, 8, 0, Math.PI * 2); // Τροχοί στην άνω ερπύστρια
+      ctx.fill();
+
+      // Τροχοί κάτω ερπύστριας
+      ctx.beginPath();
+      ctx.arc(145 + i * 30, 255, 8, 0, Math.PI * 2); // Τροχοί στην κάτω ερπύστρια
+      ctx.fill();
+    }
+  </script>
+</body>
+</html>
