@@ -40,7 +40,7 @@
 
     function Tank(ctx, options = {}) {
       this.ctx = ctx;
-
+      this.team = options.team || 1;
       // Set up position with default values
       this.position = this.position || {};
       this.position.x = options.position.x;  // Default x position
@@ -60,7 +60,7 @@
       this.wheelTracksLineNum = options.wheelTracksLineNum ?? 10;
       this.size = options.size ?? 10;
       this.speed = options.speed ?? 1;
-      this.range = options.range ?? 250;
+      this.range = options.range ?? this.size*10;
       this.angle = options.angle ?? 10;
       this.cannonAngle = options.cannonAngle ?? 11;
       this.frame = 0;
@@ -175,24 +175,20 @@
       
     };
 
-
     Tank.prototype.collide = function(otherTank) {
       const dx = this.position.x - otherTank.position.x;
       const dy = this.position.y - otherTank.position.y;
       const collisionAngle = Math.atan2(dy, dx);
   
+      this.position.x += Math.cos( collisionAngle) * this.speed*2;
+      this.position.y += Math.sin( collisionAngle) * this.speed*2; 
 
-
-      //this.position.x -= Math.sin( otherTank.angle * (Math.PI / 180)) * otherTank.speed;
-      //this.position.y -= Math.cos( otherTank.angle * (Math.PI / 180)) * otherTank.speed; 
-
-      otherTank.position.x += Math.sin( collisionAngle) * this.speed*2;
-      otherTank.position.y += Math.cos( collisionAngle) * this.speed*2; 
+      otherTank.position.x -= Math.cos( collisionAngle) * this.speed*2;
+      otherTank.position.y -= Math.sin( collisionAngle) * this.speed*2; 
       //this.moveTo.y  =  this.position.y
       this.draw(); 
      
     }
-
 
     Tank.prototype.draw = function(){
       // Draw tank with the updated position and angle
@@ -265,11 +261,10 @@
       wheelsFillStyle: "red",
       wheelTracksFillStyle: "yellow",
       wheelLineNum: 5,
-      size: 3,
+      size: 5,
       speed: 1,
       frame: 0,
       cannonAngle: 67,
-      range: 30
 
     }
 
@@ -280,11 +275,13 @@
       let opts = JSON.parse(JSON.stringify(options));
       opts.position.y += i*130;
       opts.moveToPos.y += i*130;
+      opts.team = i+1;
       let tank = new Tank(ctx, opts);
       tank.init();
       tanks.push(tank);
     }
 
+    myTeam = 1;
     selectedTankIndex = -1;
 
     setInterval(function () {
