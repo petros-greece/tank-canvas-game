@@ -49,21 +49,21 @@
       this.moveToPos.x = options.moveToPos.x;
       this.moveToPos.y = options.moveToPos.y;
       // Assign other tank properties with option values or defaults
-      this.bodyFillStyle = options.bodyFillStyle ?? "#4c8c4a";
-      this.towerFillStyle = options.towerFillStyle ?? "#3e6d3b";
-      this.canonFillStyle = options.canonFillStyle ?? "#2b4b29";
-      this.wheelsFillStyle = options.wheelsFillStyle ?? "red";
-      this.wheelTracksFillStyle = options.wheelTracksFillStyle ?? "yellow";
-      this.rangeColor = options.rangeColor ?? "blue";
+      this.bodyFill = options.bodyFill ?? "rgba(100,100,100,1)";
+      this.towerFill = options.towerFill ?? "rgba(50,50,50,1)";
+      this.cannonFill = options.cannonFill ?? "#2b4b29";
+      this.wheelTracksStroke = options.wheelTracksStroke ?? "rgb(0,0,0)";
+      this.wheelTracksFill = options.wheelTracksFill ?? "rgba(50,50,50,1)";
+      this.wheelTracksLineNum = options.wheelTracksLineNum ?? 6;
+      this.selectionColor = options.selectionColor ?? "rgba(50,50,50,.3)";
 
       // Assign defaults for size, speed, angles, and other parameters
-      this.wheelTracksLineNum = options.wheelTracksLineNum ?? 10;
       this.size = options.size ?? 10;
       this.speed = options.speed ?? 1;
       this.range = options.range ?? this.size*10;
       this.angle = options.angle ?? 10;
-      this.cannonAngle = options.cannonAngle ?? 11;
-      this.frame = 0;
+      this.cannonAngle = options.cannonAngle ?? 10;
+      this.frame = Math.floor(Math.random() * 10);
       this.selected = false;
       this.stopped = false;
       // Component object for calculations or stored dimensions
@@ -73,9 +73,9 @@
     Tank.prototype.init = function () {
       this.comp.fullSize = 14 * this.size;
       this.comp.halfSize = 7 * this.size;
+      this.comp.selectionSize = 10 * this.size;
       this.comp.isLockedDir = false;
       this.comp.lineDist = (this.comp.fullSize) / this.wheelTracksLineNum;
-      this.frame = Math.floor(Math.random() * this.comp.lineDist);
     }
 
     Tank.prototype.render = function () {
@@ -83,52 +83,33 @@
       const size = this.size;
       const ctx = this.ctx;
 
-      if(this.selected) {
-        ctx.fillStyle = this.towerFillStyle;
-        ctx.beginPath();
-        ctx.arc(0, 0, this.range, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-
-      // Draw tank body
-      ctx.fillStyle = this.bodyFillStyle;
-      ctx.fillRect(-this.comp.halfSize, -3.5 * size, this.comp.fullSize, this.comp.halfSize);
-
-      // Draw tank tower
-      ctx.fillStyle = this.towerFillStyle;
-      ctx.beginPath();
-      ctx.arc(0, 0, 2 * size, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Draw tracks
-      this.renderTracks(ctx, this.size);
-
-      // Draw cannon
-      this.renderCannon(ctx, this.size);
+      this.renderSelection(ctx);
+      this.renderBody(ctx, size);
+      this.renderTracks(ctx, size);
+      this.renderCannon(ctx, size);
 
     }
 
     Tank.prototype.renderCannon = function (ctx, size) {
-      //ctx.save();
+      ctx.save();
       //ctx.rotate(this.cannonAngle * (Math.PI / 180));
-      ctx.fillStyle = this.canonFilleStyle;
+      ctx.fillStyle = this.cannonFill;
       ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
-      //ctx.restore();
+      ctx.restore();
     }
 
     Tank.prototype.renderTracks = function (ctx, size) {
       // Draw tracks
-      ctx.fillStyle = this.wheelTracksFillStyle;
+      ctx.fillStyle = this.wheelTracksFill;
       ctx.fillRect(-this.comp.halfSize, -5.5 * size, this.comp.fullSize, 2 * size); // Upper track
       ctx.fillRect(-this.comp.halfSize, 3.5 * size, this.comp.fullSize, 2 * size); // Lower track
 
       // Draw wheels lines
-      ctx.fillStyle = this.wheelsFillStyle;
+      ctx.beginPath();
+      ctx.strokeStyle = this.wheelTracksStroke;
       const lineDist = this.comp.lineDist;
       const frame = this.frame % lineDist;
 
-      ctx.beginPath();
       for (let i = 0; i < this.wheelTracksLineNum; i++) {
         ctx.moveTo(-this.comp.halfSize + (i * lineDist + frame), -3.5 * size);
         ctx.lineTo(-this.comp.halfSize + (i * lineDist + frame), -5.5 * size);
@@ -136,6 +117,27 @@
         ctx.lineTo(-this.comp.halfSize + (i * lineDist + frame), 5.5 * size);
       }
       ctx.stroke();
+    }
+
+    Tank.prototype.renderBody = function(ctx, size){
+      // Draw tank body
+      ctx.fillStyle = this.bodyFill;
+      ctx.fillRect(-this.comp.halfSize, -3.5 * size, this.comp.fullSize, this.comp.halfSize);
+
+      // Draw tank tower
+      ctx.fillStyle = this.towerFill;
+      ctx.beginPath();
+      ctx.arc(0, 0, 2 * size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    Tank.prototype.renderSelection = function(ctx){
+      if(this.selected) {
+        ctx.fillStyle = this.selectionColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.comp.selectionSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     Tank.prototype.moveTo = function () {
@@ -152,7 +154,6 @@
       const rotationSpeed = 1; // Speed of rotation
       const angleTolerance = 1; // Angle tolerance to prevent oscillation
 
-      console.log(angleDifference)
       // Rotate gradually toward the target angle if not aligned
       if (Math.abs(angleDifference) >= angleTolerance && distance > this.speed) {
         if (angleDifference > 0) {
@@ -242,10 +243,64 @@
 
     function Missile(ctx, options = {}) {
       // Set up position with default values
+      this.ctx = ctx;
       this.position = this.position || {};
       this.position.x = options.position?.x ?? 50;  // Default x position
       this.position.y = options.position?.y ?? 130; // Default y position
+      this.width = options.width ?? 10;
+      this.height = options.height ?? 50;
+      this.flameToggle = false;
     }
+    Missile.prototype.render = function () {
+      this.renderBody(this.ctx);
+    }
+
+
+    Missile.prototype.renderBody = function (ctx) {
+            // Missile Body
+            ctx.fillStyle = "#555"; // Gray color for the body
+            ctx.fillRect(this.position.x, this.position.y, this.width, this.height); // Minimal rectangular body
+
+            // Missile Nose
+            ctx.beginPath();
+            ctx.moveTo(this.position.x, this.position.y); // Top left of the body
+            ctx.lineTo(this.position.x + this.width / 2, this.position.y - this.height / 3); // Tip of the nose
+            ctx.lineTo(this.position.x + this.width, this.position.y); // Top right of the body
+            ctx.fillStyle = "#E53935"; // Red color .or the nose
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw the fire behind the missile
+            this.renderFlame(this.ctx, this.position.x + this.width / 2, this.position.y + this.height);
+     }
+
+     Missile.prototype.renderFlame = function (ctx, x, y) {
+            // Alternate the flame size for a flickering effect
+            flameSize = this.flameToggle ? 8 : 12;
+            this.flameToggle = !this.flameToggle;
+
+            // Flame color and shape
+            ctx.beginPath();
+            ctx.moveTo(x, y); // Bottom center of missile
+            ctx.lineTo(x - flameSize / 2, y + flameSize); // Left point of flame
+            ctx.lineTo(x + flameSize / 2, y + flameSize); // Right point of flame
+            ctx.closePath();
+
+            // Gradient for the flame color
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y + flameSize, flameSize);
+            gradient.addColorStop(0, "#FFA726"); // Orange
+            gradient.addColorStop(1, "#FF5722"); // Darker orange
+
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+
+    
+    ///////////////////////////////////////////////////////////////
+    
+    let misille = new Missile(ctx);
+   
+
 
 
     /////////////////////////////////////////////////////////////
@@ -254,13 +309,7 @@
 
       position: { x: 325, y: 215 },
       moveToPos:  { x: 325, y: 215 },
-      //moveTo: { x: 300, y: 300 },
-      bodyFillStyle: "#4c8c4a",
-      towerFillStyle: "#3e6d3b",
-      canonFilleStyle: "#2b4b29",
-      wheelsFillStyle: "red",
-      wheelTracksFillStyle: "yellow",
-      wheelLineNum: 5,
+      wheelLineNum: 2,
       size: 5,
       speed: 1,
       frame: 0,
@@ -285,6 +334,7 @@
     selectedTankIndex = -1;
 
     setInterval(function () {
+      console.time('Game Loop')
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       tanks.forEach((t, index) => {
         if(selectedTankIndex > -1 && selectedTankIndex !==index && t.checkCollision(tanks[selectedTankIndex]) ){
@@ -295,22 +345,12 @@
           //t.moveToPos  = JSON.parse(JSON.stringify(t.position));
           t.moveToPos = t.position; 
         }
-
-        // if(selectedTankIndex > 0 && index !== selectedTankIndex && t.checkCollision(tanks[selectedTankIndex]) ){
-        //   tanks[selectedTankIndex].moveToPos  = JSON.parse(JSON.stringify(tanks[selectedTankIndex].position));
-        //   t.moveToPos  = JSON.parse(JSON.stringify(t.position));
-       
-        // }
-
-        // for (let i = 0; i < tanks.length; i += 1) {
-        //   if (i !== index && t.checkCollision(tanks[i])) {
-        //     t.moveToPos = t.position;
-        //     tanks[i].moveToPos = tanks[i].position;       
-        //   }
-        // }
-
+        
         t.moveTo();
       });
+      misille.render();
+
+      console.timeEnd('Game Loop')
     }, 10);
 
     
@@ -321,21 +361,19 @@
       let isClicked = false;
       
       tanks.forEach((t, index) => {
-        //t.stopped = false;
         t.selected = false;
-        if (t.checkIfClicked(position) ) {    
+         if ( t.checkIfClicked(position) ) {    
           selectedTankIndex = index;
           isClicked = true;
         }
       });
 
+      // Move the selected tank to the clicked point
       if(!isClicked){
-        //tanks[selectedTankIndex].move();
-        tanks[selectedTankIndex].moveToPos = position; // Move the selected tank to the clicked point
+        tanks[selectedTankIndex].moveToPos = position; 
       }
-     //else{
       tanks[selectedTankIndex].selected = true;
-      //}
+    
     
     });
 
