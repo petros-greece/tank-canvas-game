@@ -23,10 +23,11 @@ function Missile(ctx, options = {}) {
 
   Missile.prototype.render = function () {
     if (!this.hasExploded) {
-      this.move();
+      
       if (this.isExploding) {
         this.renderExplosion();
       } else {
+        this.move();
         this.renderBody(this.ctx);
       }
     }

@@ -28,9 +28,9 @@
   <button id="shoot">shoot</button>
 
 
-  <script src="scripts/tank.js"></script>
-  <script src="scripts/misille.js"></script>
-  <script src="scripts/objects.js"></script>
+  <script src="scripts/Tank.js"></script>
+  <script src="scripts/Misille.js"></script>
+  <script src="scripts/Objects.js"></script>
 
   <script>
     // Λήψη του canvas και του context
@@ -44,9 +44,9 @@
     }
 
 
-game.objects.push(new GameObject(ctx, { position: { x: 200, y: 100 }, width: 50, height: 50 }));
-    
-/////////////////////////////////////////////////////////////
+    game.objects.push(new GameObject(ctx, { position: { x: 100, y: 100 }, width: 50, height: 50 }));
+
+    /////////////////////////////////////////////////////////////
 
     options = {
 
@@ -85,9 +85,8 @@ game.objects.push(new GameObject(ctx, { position: { x: 200, y: 100 }, width: 50,
 
       tanks.forEach((t, index) => {
         if (selectedTankIndex > -1 && selectedTankIndex !== index && t.checkCollision(tanks[selectedTankIndex])) {
-          //tanks[selectedTankIndex].collide();
           tanks[selectedTankIndex].moveToPos = tanks[selectedTankIndex].position;
-          //t.collide(tanks[selectedTankIndex]);
+          t.collide(tanks[selectedTankIndex]);
           tanks[selectedTankIndex].collide(t);
           //t.moveToPos  = JSON.parse(JSON.stringify(t.position));
           t.moveToPos = t.position;
@@ -97,12 +96,23 @@ game.objects.push(new GameObject(ctx, { position: { x: 200, y: 100 }, width: 50,
       });
 
 
-      game.objects.forEach(gameObject => 
-      gameObject.update(game.objects.forEach(
-        gameObject => gameObject.update(game.misilles))
-      ));
-      
-      
+
+      game.objects.forEach(obj => {
+
+        tanks.forEach((t, index) => {
+
+          if (t.checkCollision(obj)) {
+            t.collide(obj)
+           t.moveToPos = t.position;
+          }
+        })
+
+        obj.update(game.misilles)
+
+      });
+
+
+
 
 
       console.timeEnd('Game Loop')
@@ -116,7 +126,7 @@ game.objects.push(new GameObject(ctx, { position: { x: 200, y: 100 }, width: 50,
       tanks.forEach((t, index) => {
         t.selected = false;
         if (t.checkIfClicked(position)) {
-          if(index === selectedTankIndex){
+          if (index === selectedTankIndex) {
             tanks[selectedTankIndex].fireMisille(ctx)
           }
           selectedTankIndex = index;
@@ -127,14 +137,14 @@ game.objects.push(new GameObject(ctx, { position: { x: 200, y: 100 }, width: 50,
       // Move the selected tank to the clicked point
       if (!isClicked) {
         tanks[selectedTankIndex].moveToPos = position;
-       // tanks[selectedTankIndex].fireMisille(ctx);
+        // tanks[selectedTankIndex].fireMisille(ctx);
       }
       tanks[selectedTankIndex].selected = true;
 
 
     });
 
-    document.getElementById('shoot').onclick = function(){
+    document.getElementById('shoot').onclick = function () {
       //alert('yo')
       tanks[0].fireMisille(ctx);
     }

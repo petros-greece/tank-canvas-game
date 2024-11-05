@@ -5,13 +5,21 @@ function GameObject(ctx, options = {}) {
     this.height = options.height || 30;  // Default height of the object
     this.color = options.color || "#4CAF50";  // Default color
     this.isColliding = false;  // Track collision state
+    this.comp = {}
+    this.speed = 0;
+    this.init();
+}
+
+GameObject.prototype.init = function(){
+    this.comp.halfW = this.width/2;
+    this.comp.halfH = this.height/2;
 }
 
 // Render the game object
 GameObject.prototype.render = function () {
     this.ctx.save();
     this.ctx.fillStyle = this.isColliding ? "#FF0000" : this.color;  // Change color if colliding
-    this.ctx.fillRect(this.position.x, this.position.y, this.width, this.height);  // Draw rectangle
+    this.ctx.fillRect(this.position.x - this.comp.halfW, this.position.y - this.comp.halfH , this.width, this.height);  // Draw rectangle
     this.ctx.restore();
 };
 

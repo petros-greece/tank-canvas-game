@@ -29,17 +29,20 @@ function Tank(ctx, options = {}) {
     // Component object for calculations or stored dimensions
     this.comp = {};
     this.init();
-  }
+}
 
-  Tank.prototype.init = function () {
-    this.comp.fullSize = 14 * this.size;
-    this.comp.halfSize = 7 * this.size;
+Tank.prototype.init = function () {
+    this.width = 14 * this.size;
+    this.height = 11 * this.size;
+    this.comp.halfW = 7 * this.size;
+    this.comp.halfH = (this.height / 2);
     this.comp.selectionSize = 10 * this.size;
     this.comp.isLockedDir = false;
-    this.comp.lineDist = (this.comp.fullSize) / this.wheelTracksLineNum;
-  }
+    this.comp.lineDist = (this.width) / this.wheelTracksLineNum;
+    this.comp.halfBody = 3.5 * this.size;
+}
 
-  Tank.prototype.render = function () {
+Tank.prototype.render = function () {
 
     const size = this.size;
     const ctx = this.ctx;
@@ -49,21 +52,21 @@ function Tank(ctx, options = {}) {
     this.renderTracks(ctx, size);
     this.renderCannon(ctx, size);
 
-  }
+}
 
-  Tank.prototype.renderCannon = function (ctx, size) {
+Tank.prototype.renderCannon = function (ctx, size) {
     ctx.save();
     //ctx.rotate(this.cannonAngle * (Math.PI / 180));
     ctx.fillStyle = this.cannonFill;
     ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
     ctx.restore();
-  }
+}
 
-  Tank.prototype.renderTracks = function (ctx, size) {
+Tank.prototype.renderTracks = function (ctx, size) {
     // Draw tracks
     ctx.fillStyle = this.wheelTracksFill;
-    ctx.fillRect(-this.comp.halfSize, -5.5 * size, this.comp.fullSize, 2 * size); // Upper track
-    ctx.fillRect(-this.comp.halfSize, 3.5 * size, this.comp.fullSize, 2 * size); // Lower track
+    ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, 2 * size); // Upper track
+    ctx.fillRect(-this.comp.halfW, this.comp.halfBody, this.width, 2 * size); // Lower track
 
     // Draw wheels lines
     ctx.beginPath();
@@ -72,36 +75,36 @@ function Tank(ctx, options = {}) {
     const frame = this.frame % lineDist;
 
     for (let i = 0; i < this.wheelTracksLineNum; i++) {
-      ctx.moveTo(-this.comp.halfSize + (i * lineDist + frame), -3.5 * size);
-      ctx.lineTo(-this.comp.halfSize + (i * lineDist + frame), -5.5 * size);
-      ctx.moveTo(-this.comp.halfSize + (i * lineDist + frame), 3.5 * size);
-      ctx.lineTo(-this.comp.halfSize + (i * lineDist + frame), 5.5 * size);
+        ctx.moveTo(-this.comp.halfW + (i * lineDist + frame), -this.comp.halfBody);
+        ctx.lineTo(-this.comp.halfW + (i * lineDist + frame), -this.comp.halfH);
+        ctx.moveTo(-this.comp.halfW + (i * lineDist + frame), this.comp.halfBody);
+        ctx.lineTo(-this.comp.halfW + (i * lineDist + frame), this.comp.halfH);
     }
     ctx.stroke();
-  }
+}
 
-  Tank.prototype.renderBody = function (ctx, size) {
+Tank.prototype.renderBody = function (ctx, size) {
     // Draw tank body
     ctx.fillStyle = this.bodyFill;
-    ctx.fillRect(-this.comp.halfSize, -3.5 * size, this.comp.fullSize, this.comp.halfSize);
+    ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
 
     // Draw tank tower
     ctx.fillStyle = this.towerFill;
     ctx.beginPath();
     ctx.arc(0, 0, 2 * size, 0, Math.PI * 2);
     ctx.fill();
-  }
+}
 
-  Tank.prototype.renderSelection = function (ctx) {
+Tank.prototype.renderSelection = function (ctx) {
     if (this.selected) {
-      ctx.fillStyle = this.selectionColor;
-      ctx.beginPath();
-      ctx.arc(0, 0, this.comp.selectionSize, 0, Math.PI * 2);
-      ctx.fill();
+        ctx.fillStyle = this.selectionColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.comp.selectionSize, 0, Math.PI * 2);
+        ctx.fill();
     }
-  }
+}
 
-  Tank.prototype.moveTo = function () {
+Tank.prototype.moveTo = function () {
 
     const dx = this.moveToPos.x - this.position.x;
     const dy = this.moveToPos.y - this.position.y;
@@ -117,42 +120,27 @@ function Tank(ctx, options = {}) {
 
     // Rotate gradually toward the target angle if not aligned
     if (Math.abs(angleDifference) >= angleTolerance && distance > this.speed) {
-      if (angleDifference > 0) {
-        this.angle += Math.min(rotationSpeed, angleDifference); // Rotate clockwise
-      } else {
-        this.angle -= Math.min(rotationSpeed, -angleDifference); // Rotate counterclockwise
-      }
-      this.frame += 1;
+        if (angleDifference > 0) {
+            this.angle += Math.min(rotationSpeed, angleDifference); // Rotate clockwise
+        } else {
+            this.angle -= Math.min(rotationSpeed, -angleDifference); // Rotate counterclockwise
+        }
+        this.frame += 1;
     }
 
     // Move forward if aligned within tolerance of the target direction
     if (Math.abs(angleDifference) <= angleTolerance && distance > this.speed) {
-      const moveSpeed = Math.min(this.speed, distance);
-      this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed;
-      this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed;
-      this.frame += 1;
+        const moveSpeed = Math.min(this.speed, distance);
+        this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed;
+        this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed;
+        this.frame += 1;
     }
 
     this.draw();
 
-  };
+};
 
-  Tank.prototype.collide = function (otherTank) {
-    const dx = this.position.x - otherTank.position.x;
-    const dy = this.position.y - otherTank.position.y;
-    const collisionAngle = Math.atan2(dy, dx);
-
-    this.position.x += Math.cos(collisionAngle) * this.speed * 2;
-    this.position.y += Math.sin(collisionAngle) * this.speed * 2;
-
-    otherTank.position.x -= Math.cos(collisionAngle) * this.speed * 2;
-    otherTank.position.y -= Math.sin(collisionAngle) * this.speed * 2;
-    //this.moveTo.y  =  this.position.y
-    this.draw();
-
-  }
-
-  Tank.prototype.draw = function () {
+Tank.prototype.draw = function () {
     // Draw tank with the updated position and angle
     const ctx = this.ctx;
     ctx.save();
@@ -160,15 +148,89 @@ function Tank(ctx, options = {}) {
     ctx.rotate(this.angle * (Math.PI / 180));
     this.render();
     ctx.restore();
-  }
+}
 
-  Tank.prototype.checkIfClicked = function (position) {
-    const size = this.size;
+////////////////////////////////////////////////////////
 
-    // Tank dimensions centered on its position
-    const halfWidth = this.comp.fullSize;
-    const halfHeight = 7 * size;
+Tank.prototype.collide = function (obj) {
+    const dx = this.position.x - obj.position.x;
+    const dy = this.position.y - obj.position.y;
+    const collisionAngle = Math.atan2(dy, dx);
 
+    this.position.x += Math.cos(collisionAngle) * obj.speed * 2;
+    this.position.y += Math.sin(collisionAngle) * obj.speed * 2;
+
+    obj.position.x -= Math.cos(collisionAngle) * this.speed * 2;
+    obj.position.y -= Math.sin(collisionAngle) * this.speed * 2;
+    //this.moveTo.y  =  this.position.y
+    this.draw();
+
+}
+
+Tank.prototype.checkCollision = function (otherTank) {
+    const dx = this.position.x - otherTank.position.x;
+    const dy = this.position.y - otherTank.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Collision threshold based on tank size
+    const collisionDistance = this.comp.halfW + otherTank.comp.halfW; // Adjust as needed based on tank size
+    return distance < Math.floor(collisionDistance);
+};
+
+Tank.prototype.detectCollision = function (gameObject) {
+    const tankLeft = this.position.x - this.comp.halfW;
+    const tankRight = this.position.x + this.width;
+    const tankTop = this.position.y - this.comp.halfH;
+    const tankBottom = this.position.y + this.height;
+
+    const objLeft = gameObject.position.x - gameObject.comp.halfW ;
+    const objRight = gameObject.position.x + gameObject.width;
+    const objTop = gameObject.position.y -  gameObject.comp.halfH;
+    const objBottom = gameObject.position.y + gameObject.height;
+
+    if (
+        tankRight > objLeft &&
+        tankLeft < objRight &&
+        tankBottom > objTop &&
+        tankTop < objBottom
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+Tank.prototype.collideObject = function (obj) {
+    const dx = this.position.x - obj.position.x;
+    const dy = this.position.y - obj.position.y;
+    const collisionAngle = Math.atan2(dy, dx);
+
+    this.position.x += Math.cos(collisionAngle) * this.speed * 2;
+    this.position.y += Math.sin(collisionAngle) * this.speed * 2;
+
+    obj.position.x -= Math.cos(collisionAngle) * this.speed * 2;
+    obj.position.y -= Math.sin(collisionAngle) * this.speed * 2;
+    //this.moveTo.y  =  this.position.y
+    this.draw();
+
+}
+
+/////////////////////////////////////////////////////////////
+
+Tank.prototype.fireMisille = function (ctx) {
+    let misille = new Missile(ctx, {
+        position: {
+            x: this.position.x,
+            y: this.position.y - (this.size * 2)
+        },
+        angle: this.angle,
+        width: this.size,
+        height: this.size * 4
+    });
+    game.misilles.push(misille);
+}
+
+Tank.prototype.checkIfClicked = function (position) {
     // Step 1: Translate the click position to the tank's local coordinate system
     const dx = position.x - this.position.x;
     const dy = position.y - this.position.y;
@@ -180,35 +242,12 @@ function Tank(ctx, options = {}) {
 
     // Step 3: Check if the rotated click coordinates fall within the tank's rectangular boundaries
     const isWithinBounds = (
-      rotatedX >= -halfWidth &&
-      rotatedX <= halfWidth &&
-      rotatedY >= -halfHeight &&
-      rotatedY <= halfHeight
+        rotatedX >= -this.comp.halfW &&
+        rotatedX <= this.comp.halfW &&
+        rotatedY >= -this.comp.halfH &&
+        rotatedY <= this.comp.halfH
     );
-
-    return isWithinBounds; // Returns true if within bounds, false otherwise
-  };
-
-  Tank.prototype.checkCollision = function (otherTank) {
-    const dx = this.position.x - otherTank.position.x;
-    const dy = this.position.y - otherTank.position.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    // Collision threshold based on tank size
-    const collisionDistance = this.comp.halfSize + otherTank.comp.halfSize; // Adjust as needed based on tank size
-    return distance < Math.floor(collisionDistance);
-  };
-
-  Tank.prototype.fireMisille = function(ctx){
-    let misille = new Missile(ctx, {
-      position: {
-        x: this.position.x, 
-        y: this.position.y-(this.size*2)
-      },
-      angle: this.angle,
-      width: this.size,
-      height: this.size*4
-    });
-    game.misilles.push(misille);
-  }
+    // Returns true if within bounds, false otherwise
+    return isWithinBounds;
+};
 
