@@ -8,6 +8,7 @@ function Tank(ctx, options = {}) {
     this.moveToPos = options.moveToPos || {};
     this.moveToPos.x = options.moveToPos.x;
     this.moveToPos.y = options.moveToPos.y;
+    this.targetPos = {};
     // Assign other tank properties with option values or defaults
     this.bodyFill = options.bodyFill ?? "rgba(100,100,100,1)";
     this.towerFill = options.towerFill ?? "rgba(50,50,50,1)";
@@ -20,16 +21,24 @@ function Tank(ctx, options = {}) {
     // Assign defaults for size, speed, angles, and other parameters
     this.size = options.size ?? 10;
     this.speed = options.speed ?? 1;
-    this.range = options.range ?? this.size * 10;
-    this.angle = options.angle ?? 360;
-    this.cannonAngle = options.cannonAngle ?? 10;
+    this.angle = options.angle ?? 0;
+    this.cannonAngle = options.cannonAngle ?? 0;
     this.frame = Math.floor(Math.random() * 10);
+    this.weight = 1000;
+    this.armor = 100;
+
     this.selected = false;
     this.stopped = false;
     // Component object for calculations or stored dimensions
     this.comp = {};
     this.init();
 }
+
+
+
+
+
+/** PALLETE ******************************************** */
 
 Tank.prototype.init = function () {
     this.width = 14 * this.size;
@@ -40,6 +49,7 @@ Tank.prototype.init = function () {
     this.comp.isLockedDir = false;
     this.comp.lineDist = (this.width) / this.wheelTracksLineNum;
     this.comp.halfBody = 3.5 * this.size;
+    this.comp.damage = 0;
 }
 
 Tank.prototype.render = function () {
@@ -52,11 +62,15 @@ Tank.prototype.render = function () {
     this.renderTracks(ctx, size);
     this.renderCannon(ctx, size);
 
+    if(this.isFiring){
+        this.fireMissileTo(ctx);
+    }
+
 }
 
 Tank.prototype.renderCannon = function (ctx, size) {
     ctx.save();
-    //ctx.rotate(this.cannonAngle * (Math.PI / 180));
+    ctx.rotate((this.cannonAngle - this.angle ) * (Math.PI / 180));
     ctx.fillStyle = this.cannonFill;
     ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
     ctx.restore();
@@ -87,6 +101,10 @@ Tank.prototype.renderBody = function (ctx, size) {
     // Draw tank body
     ctx.fillStyle = this.bodyFill;
     ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
+    
+    ctx.fillStyle = `rgba(5,5,5,${this.comp.damage/this.armor})`;
+    ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
+    //this.comp.damage
 
     // Draw tank tower
     ctx.fillStyle = this.towerFill;
@@ -105,40 +123,55 @@ Tank.prototype.renderSelection = function (ctx) {
 }
 
 Tank.prototype.moveTo = function () {
-
     const dx = this.moveToPos.x - this.position.x;
     const dy = this.moveToPos.y - this.position.y;
     const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Target angle in degrees
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Calculate shortest angle difference (clockwise or counterclockwise)
-    let angleDifference = (targetAngle - this.angle + 360) % 360;
-    if (angleDifference > 180) angleDifference -= 360; // Adjust to the shortest direction
+    // Normalize current tank angle to [0, 360)
+    this.angle = (this.angle + 360) % 360;
 
-    const rotationSpeed = 1; // Speed of rotation
-    const angleTolerance = 1; // Angle tolerance to prevent oscillation
+    // Calculate the angle difference for moving forward
+    let forwardAngleDiff = (targetAngle - this.angle + 360) % 360;
+    if (forwardAngleDiff > 180) forwardAngleDiff -= 360; // Ensure it's within [-180, 180]
 
-    // Rotate gradually toward the target angle if not aligned
-    if (Math.abs(angleDifference) >= angleTolerance && distance > this.speed) {
+    // Calculate the angle difference for moving backward (180 degrees opposite)
+    let backwardAngleDiff = (targetAngle - (this.angle + 180) + 360) % 360;
+    if (backwardAngleDiff > 180) backwardAngleDiff -= 360; // Ensure it's within [-180, 180]
+
+    // Determine the optimal movement direction (forward or backward)
+    let moveBackward = false;
+    let angleDifference = forwardAngleDiff;
+
+    if (Math.abs(backwardAngleDiff) < Math.abs(forwardAngleDiff)) {
+        moveBackward = true;
+        angleDifference = backwardAngleDiff;
+    }
+
+    const rotationSpeed = 1; // Speed of rotation in degrees per frame
+    const angleTolerance = 1; // Angle tolerance to stop rotating
+
+    // Rotate gradually toward the target angle if not aligned within tolerance
+    if (Math.abs(angleDifference) > angleTolerance) {
         if (angleDifference > 0) {
             this.angle += Math.min(rotationSpeed, angleDifference); // Rotate clockwise
         } else {
             this.angle -= Math.min(rotationSpeed, -angleDifference); // Rotate counterclockwise
         }
-        this.frame += 1;
+        this.angle = (this.angle + 360) % 360; // Keep angle normalized within [0, 360)
     }
 
-    // Move forward if aligned within tolerance of the target direction
+    // Move forward or backward if aligned within tolerance of the target direction
     if (Math.abs(angleDifference) <= angleTolerance && distance > this.speed) {
         const moveSpeed = Math.min(this.speed, distance);
-        this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed;
-        this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed;
-        this.frame += 1;
+        const direction = moveBackward ? -1 : 1;
+        this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed * direction;
+        this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed * direction;
     }
 
     this.draw();
-
 };
+
 
 Tank.prototype.draw = function () {
     // Draw tank with the updated position and angle
@@ -150,7 +183,7 @@ Tank.prototype.draw = function () {
     ctx.restore();
 }
 
-////////////////////////////////////////////////////////
+/** COLLISIONS ******************************************** */
 
 Tank.prototype.collide = function (obj) {
     const dx = this.position.x - obj.position.x;
@@ -213,20 +246,61 @@ Tank.prototype.collideObject = function (obj) {
 
 }
 
-/////////////////////////////////////////////////////////////
-
-Tank.prototype.fireMisille = function (ctx) {
-    let misille = new Missile(ctx, {
-        position: {
-            x: this.position.x,
-            y: this.position.y - (this.size * 2)
-        },
-        angle: this.angle,
-        width: this.size,
-        height: this.size * 4
-    });
-    game.misilles.push(misille);
+Tank.prototype.stop = function(){
+    this.moveToPos = JSON.parse(JSON.stringify(this.position));
 }
+
+/** UI ******************************************** */
+
+
+
+Tank.prototype.fireMissile = function (ctx) {
+        // Create and initialize the missile
+        let missile = new Missile(ctx, {
+            position: {
+                x: this.position.x,
+                y: this.position.y
+            },
+            angle: this.cannonAngle,  // Set missile angle to match the cannon's angle
+            width: this.size,
+            height: this.size * 4
+        });
+
+        // Add the missile to the game's missiles array
+        game.missiles.push(missile);
+}
+
+Tank.prototype.fireMissileTo = function (ctx) { 
+    this.stop();
+    this.isFiring = true;
+
+    // Calculate the angle to the target position
+    const dx = this.targetPos.x - this.position.x;
+    const dy = this.targetPos.y - this.position.y;
+    this.comp.targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert radians to degrees
+
+    const rotationStep = 1; // Degrees to rotate per frame
+
+    // Calculate angle difference and normalize to [-180, 180] range
+    let angleDifference = this.comp.targetAngle - this.cannonAngle;
+    angleDifference = normalizeAngleDifference(angleDifference);
+
+    console.log(`Angle Difference: ${angleDifference}`); // Debugging output to verify normalization
+
+    // Rotate the tank's cannon gradually
+    if (Math.abs(angleDifference) > rotationStep) {
+        // Rotate by one degree in the shortest direction
+        this.cannonAngle += (angleDifference > 0 ? rotationStep : -rotationStep);
+    } else {
+        // Snap to target angle and fire if aligned within tolerance
+        this.cannonAngle = this.comp.targetAngle;
+        this.isFiring = false;
+        this.fireMissile(ctx);
+    }
+};
+
+
+
 
 Tank.prototype.checkIfClicked = function (position) {
     // Step 1: Translate the click position to the tank's local coordinate system
