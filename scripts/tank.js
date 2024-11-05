@@ -167,38 +167,36 @@ Tank.prototype.collide = function (obj) {
 
 }
 
-Tank.prototype.checkCollision = function (otherTank) {
-    const dx = this.position.x - otherTank.position.x;
-    const dy = this.position.y - otherTank.position.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+Tank.prototype.detectCollision = function(gameObject) {
+    // Get rotated corners of tank and gameObject
+    const tankCorners = getRotatedCorners(this);
+    const objectCorners = getRotatedCorners(gameObject);
 
-    // Collision threshold based on tank size
-    const collisionDistance = this.comp.halfW + otherTank.comp.halfW; // Adjust as needed based on tank size
-    return distance < Math.floor(collisionDistance);
-};
+    // All edges of both objects, treated as axes to project onto
+    const edges = [
+        { x: tankCorners[1].x - tankCorners[0].x, y: tankCorners[1].y - tankCorners[0].y },
+        { x: tankCorners[1].x - tankCorners[2].x, y: tankCorners[1].y - tankCorners[2].y },
+        { x: objectCorners[0].x - objectCorners[1].x, y: objectCorners[0].y - objectCorners[1].y },
+        { x: objectCorners[1].x - objectCorners[2].x, y: objectCorners[1].y - objectCorners[2].y }
+    ];
 
-Tank.prototype.detectCollision = function (gameObject) {
-    const tankLeft = this.position.x - this.comp.halfW;
-    const tankRight = this.position.x + this.width;
-    const tankTop = this.position.y - this.comp.halfH;
-    const tankBottom = this.position.y + this.height;
+    // Check all edges as potential separating axes
+    for (const edge of edges) {
+        const axis = { x: -edge.y, y: edge.x }; // Perpendicular axis to the edge
 
-    const objLeft = gameObject.position.x - gameObject.comp.halfW ;
-    const objRight = gameObject.position.x + gameObject.width;
-    const objTop = gameObject.position.y -  gameObject.comp.halfH;
-    const objBottom = gameObject.position.y + gameObject.height;
+        // Project both polygons onto the axis
+        const tankProjection = projectPolygon(tankCorners, axis);
+        const objectProjection = projectPolygon(objectCorners, axis);
 
-    if (
-        tankRight > objLeft &&
-        tankLeft < objRight &&
-        tankBottom > objTop &&
-        tankTop < objBottom
-    ) {
-        return true;
-    } else {
-        return false;
+        // If there's no overlap on this axis, there's no collision
+        if (!projectionsOverlap(tankProjection.min, tankProjection.max, objectProjection.min, objectProjection.max)) {
+            return false; // Separating axis found, no collision
+        }
     }
-};
+
+    // No separating axis found, collision detected
+    return true;
+}; 
 
 Tank.prototype.collideObject = function (obj) {
     const dx = this.position.x - obj.position.x;
@@ -250,4 +248,8 @@ Tank.prototype.checkIfClicked = function (position) {
     // Returns true if within bounds, false otherwise
     return isWithinBounds;
 };
+
+
+
+
 

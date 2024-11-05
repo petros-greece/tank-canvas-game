@@ -27,7 +27,7 @@
 
   <button id="shoot">shoot</button>
 
-
+  <script src="scripts/helpers.js"></script>
   <script src="scripts/Tank.js"></script>
   <script src="scripts/Misille.js"></script>
   <script src="scripts/Objects.js"></script>
@@ -44,7 +44,9 @@
     }
 
 
-    game.objects.push(new GameObject(ctx, { position: { x: 100, y: 100 }, width: 50, height: 50 }));
+    game.objects.push(
+      new GameObject(ctx, { angle: 50, position: { x: 230, y: 120 }, width: 50, height: 50 })
+    );
 
     /////////////////////////////////////////////////////////////
 
@@ -84,7 +86,7 @@
       });
 
       tanks.forEach((t, index) => {
-        if (selectedTankIndex > -1 && selectedTankIndex !== index && t.checkCollision(tanks[selectedTankIndex])) {
+        if (selectedTankIndex > -1 && selectedTankIndex !== index && t.detectCollision(tanks[selectedTankIndex])) {
           tanks[selectedTankIndex].moveToPos = tanks[selectedTankIndex].position;
           t.collide(tanks[selectedTankIndex]);
           tanks[selectedTankIndex].collide(t);
@@ -101,13 +103,14 @@
 
         tanks.forEach((t, index) => {
 
-          if (t.checkCollision(obj)) {
+          if (t.detectCollision(obj)) {
             t.collide(obj)
            t.moveToPos = t.position;
           }
         })
+        obj.render()
 
-        obj.update(game.misilles)
+        //obj.update(game.misilles)
 
       });
 

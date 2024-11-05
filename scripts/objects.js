@@ -7,6 +7,7 @@ function GameObject(ctx, options = {}) {
     this.isColliding = false;  // Track collision state
     this.comp = {}
     this.speed = 0;
+    this.angle = options.angle || 10;
     this.init();
 }
 
@@ -18,9 +19,20 @@ GameObject.prototype.init = function(){
 // Render the game object
 GameObject.prototype.render = function () {
     this.ctx.save();
+
+    // Translate to object's center for rotation
+    this.ctx.translate(this.position.x, this.position.y);
+    this.ctx.rotate(this.angle * Math.PI / 180);  // Convert angle to radians
+
+    // Draw rotated rectangle (centered)
+    //this.ctx.save();
     this.ctx.fillStyle = this.isColliding ? "#FF0000" : this.color;  // Change color if colliding
-    this.ctx.fillRect(this.position.x - this.comp.halfW, this.position.y - this.comp.halfH , this.width, this.height);  // Draw rectangle
+    this.ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);     
     this.ctx.restore();
+    // this.ctx.restore();
+
+
+
 };
 
 // Check collision with a missile
@@ -61,4 +73,37 @@ GameObject.prototype.update = function (missiles) {
 
     // Render the object
     this.render();
+};
+
+
+GameObject.prototype.getRotatedCorners = function () {
+    const angleRad = this.angle * (Math.PI / 180); // Convert angle to radians
+
+    // Center of the tank
+    const cx = this.position.x;
+    const cy = this.position.y;
+
+    // Half dimensions
+    const halfW = this.comp.halfW;
+    const halfH = this.comp.halfH;
+
+    // Calculate the corners with rotation
+    return [
+        {
+            x: cx + (Math.cos(angleRad) * -halfW - Math.sin(angleRad) * -halfH),
+            y: cy + (Math.sin(angleRad) * -halfW + Math.cos(angleRad) * -halfH)
+        },
+        {
+            x: cx + (Math.cos(angleRad) * halfW - Math.sin(angleRad) * -halfH),
+            y: cy + (Math.sin(angleRad) * halfW + Math.cos(angleRad) * -halfH)
+        },
+        {
+            x: cx + (Math.cos(angleRad) * halfW - Math.sin(angleRad) * halfH),
+            y: cy + (Math.sin(angleRad) * halfW + Math.cos(angleRad) * halfH)
+        },
+        {
+            x: cx + (Math.cos(angleRad) * -halfW - Math.sin(angleRad) * halfH),
+            y: cy + (Math.sin(angleRad) * -halfW + Math.cos(angleRad) * halfH)
+        }
+    ];
 };
