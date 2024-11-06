@@ -61,10 +61,10 @@ Tank.prototype.render = function () {
     this.renderTracks(ctx, size);
     this.renderCannon(ctx, size);
 
-    if(this.isFiring){
+    if (this.isFiring) {
         this.fireMissileTo(ctx);
     }
-    if(this.isExploding){
+    if (this.isExploding) {
         this.renderExplosion();
     }
 
@@ -72,7 +72,7 @@ Tank.prototype.render = function () {
 
 Tank.prototype.renderCannon = function (ctx, size) {
     ctx.save();
-    ctx.rotate((this.cannonAngle ) * (Math.PI / 180));
+    ctx.rotate((this.cannonAngle) * (Math.PI / 180));
     ctx.fillStyle = this.cannonFill;
     ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
     ctx.restore();
@@ -103,10 +103,10 @@ Tank.prototype.renderBody = function (ctx, size) {
     // Draw tank body
     ctx.fillStyle = this.bodyFill;
     ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
-    
+
     ctx.fillStyle = `rgba(5,5,5,${this.comp.damage})`;
-    ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width*this.comp.damage, this.comp.halfW);
-    
+    ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width * this.comp.damage, this.comp.halfW);
+
     //console.log(this.comp.damage, this.damage, this.armor);
 
     // Draw tank tower
@@ -204,7 +204,7 @@ Tank.prototype.collide = function (obj) {
 
 }
 
-Tank.prototype.detectCollision = function(gameObject) {
+Tank.prototype.detectCollision = function (gameObject) {
     // Get rotated corners of tank and gameObject
     const tankCorners = getRotatedCorners(this);
     const objectCorners = getRotatedCorners(gameObject);
@@ -233,7 +233,7 @@ Tank.prototype.detectCollision = function(gameObject) {
 
     // No separating axis found, collision detected
     return true;
-}; 
+};
 
 Tank.prototype.collideObject = function (obj) {
     const dx = this.position.x - obj.position.x;
@@ -250,19 +250,19 @@ Tank.prototype.collideObject = function (obj) {
 
 }
 
-Tank.prototype.stop = function(){
+Tank.prototype.stop = function () {
     this.moveToPos = JSON.parse(JSON.stringify(this.position));
 }
 
 /** DAMAGING ***************************************************************** */
 
-Tank.prototype.addDamage = function(power){
-    if(this.comp.damage >= 1){
+Tank.prototype.addDamage = function (power) {
+    if (this.comp.damage >= 1) {
         this.explode();
         return;
     }
     this.damage += power;
-    this.comp.damage =  this.damage/this.armor;
+    this.comp.damage = this.damage / this.armor;
 
 }
 
@@ -308,27 +308,25 @@ Tank.prototype.destroy = function () {
     this.isDestroyed = true; // Flag to destroy the tank
 };
 
-/** UI ******************************************** */
+/** FIRING ******************************************** */
 
 Tank.prototype.fireMissile = function (ctx) {
-        let cannonGlobalAngle = (this.angle + this.cannonAngle) % 360;
-        // Create and initialize the missile
-        let missile = new Missile(ctx, {
-            position: {
-                x: this.position.x,
-                y: this.position.y
-            },
-            angle: cannonGlobalAngle,  // Set missile angle to match the cannon's angle
-            width: this.size,
-            height: this.size * 4,
-            owner: this.id
-        });
+    let cannonGlobalAngle = (this.angle + this.cannonAngle) % 360;
+    // Create and initialize the missile
+    let missile = new Missile(ctx, {
+        position: {
+            x: this.position.x,
+            y: this.position.y
+        },
+        angle: cannonGlobalAngle,  // Set missile angle to match the cannon's angle
+        width: this.size,
+        height: this.size * 4,
+        owner: this.id
+    });
 
-        // Add the missile to the game's missiles array
-        game.missiles.push(missile);
+    // Add the missile to the game's missiles array
+    game.missiles.push(missile);
 }
-
-
 
 Tank.prototype.fireMissileTo = function (ctx) {
     // Calculate the angle to the target position
@@ -371,8 +369,7 @@ Tank.prototype.fireMissileTo = function (ctx) {
     if (this.cannonAngle > 180) this.cannonAngle -= 360;
 };
 
-
-
+/** UI ******************************************** */
 
 Tank.prototype.checkIfClicked = function (position) {
     // Step 1: Translate the click position to the tank's local coordinate system
