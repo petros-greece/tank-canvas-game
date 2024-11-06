@@ -6,8 +6,8 @@ class Tank {
         this.id = options.id ? `tank_${options.id}` : 'tank_0';
         // Set up position with default values
         this.position = this.position || {};
-        this.position.x = options.position.x;  // Default x position
-        this.position.y = options.position.y; // Default y position
+        this.position.x = options.position.x || 200;  // Default x position
+        this.position.y = options.position.y || 200; // Default y position
         this.moveToPos = options.moveToPos || {};
         this.moveToPos.x = options.moveToPos.x;
         this.moveToPos.y = options.moveToPos.y;
@@ -59,9 +59,9 @@ class Tank {
         const size = this.size;
         const ctx = this.ctx;
 
-        if (this.automated) {
-            this.render
-        }
+        // if (this.automated) {
+        //     this.render
+        // }
 
         this.renderSelection(ctx);
         this.renderBody(ctx, size);
@@ -402,6 +402,8 @@ class Tank {
 
     /** AUTOMATION *********************************************/
 
+
+    
 
 
     /**

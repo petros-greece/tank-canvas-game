@@ -28,181 +28,230 @@
   <button id="shoot">shoot</button>
 
   <script src="scripts/helpers.js"></script>
+
+  <script src="scripts/WorldBuilder.js"></script>
   <script src="scripts/Missile.js"></script>
   <script src="scripts/Tank.js"></script>
-
   <script src="scripts/Objects.js"></script>
+  <script src="scripts/Game.js"></script>
 
   <script>
     // Λήψη του canvas και του context
     const canvas = document.getElementById("tankCanvas");
     const ctx = canvas.getContext("2d");
 
-    game = {
-      missiles: [],
-      objects: []
-      //frame: 0
-    }
-
-    myTeam = 1;
-    selectedTankIndex = -1;
-    let tanks = [];
-
-    game.objects.push(
-      new GameObject(ctx, { angle: 50, position: { x: 230, y: 120 }, width: 50, height: 50 })
-    );
-
-    /////////////////////////////////////////////////////////////
-
-    options = {
-      position: { x: 325, y: 215 },
-      moveToPos: { x: 325, y: 215 },
-      wheelLineNum: 2,
-      size: 5,
-      speed: 1,
-      frame: 0,
-      cannonAngle: 0,
-      bodyFill: 'red',
-      id: 0,
-    }
-
-
-    for (let i = 0; i < 2; i += 1) {
-      //debugger;
-      let opts = JSON.parse(JSON.stringify(options));
-      opts.position.y += i * 130;
-      opts.moveToPos.y += i * 130;
-      opts.team = i + 1;
-      opts.id+= i;
-      let tank = new Tank(ctx, opts);
-      tanks.push(tank);
-    }
-
-
-    canvas.addEventListener('click', (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const position = { x: event.clientX - rect.left, y: event.clientY - rect.top }
-      let isClicked = false;
-
-      tanks.forEach((t, index) => {
-
-        t.selected = false;
-        if (t.checkIfClicked(position)) {
-          if (t.team === myTeam) {
-
-            // if (index === selectedTankIndex) {
-            //   tanks[selectedTankIndex].fireMissile(ctx)
-            // }
-            selectedTankIndex = index;
-            isClicked = true;
-
-          }
-          else{
-            tanks[selectedTankIndex].targetPos =  position;
-            tanks[selectedTankIndex].isFiring = true;
-            //tanks[selectedTankIndex].addDamage(10);
-            //tanks[selectedTankIndex].fireMissileTo(ctx);
-            isClicked = true;
+    let gameOptions = {
+      worldBuilders: [
+        {
+          builderOpts: {
+            num: 40,
+            dx: 40,
+            dy: 9,
+            sx: 0,
+            sy: 0,
+            sa: 0
+          },
+          objectOpts: {
+            height: 30,
+            width: 30,
+            position: { x: 20, y: 20 }
           }
         }
+      ],
+      tankOpts: [{
+        position: { x: 325, y: 215 },
+        moveToPos: { x: 325, y: 215 },
+        wheelLineNum: 2,
+        size: 5,
+        speed: 1,
+        frame: 0,
+        cannonAngle: 0,
+        bodyFill: 'red',
+        id: 0,
+        team: 'Warriors'
+      }]
 
-      
+    }
 
 
-      });
-
-      // Move the selected tank to the clicked point
-      if (!isClicked) {
-        tanks[selectedTankIndex].moveToPos = position;
-        // tanks[selectedTankIndex].fireMissile(ctx);
-      }
-      tanks[selectedTankIndex].selected = true;
 
 
-    });
 
 
-    console.log(tanks)
-    setInterval(function () {
-      //console.time('Game Loop')
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+
+
+
+    let game = new Game(canvas, gameOptions);
+    game.attachEvents();
     
+    game.run();
 
-      tanks.forEach((t, index) => {
-
-        if(t.isDestroyed){
-          tanks.splice(index,1)
+    /************
+        
+        let game = {
+          missiles: [],
+          objects: [],
+          enemyTanks: []
+          //frame: 0
         }
-       // console.log( t.id)
-
-       //console.log(tanks[0].frame);
-        game.missiles.forEach((missile, index) => {
-          //console.log(index)
-          if( missile.owner !== t.id && 
-              t.detectCollision(missile) && 
-              !missile.isExploding){
-            //console.log(tanks[0].frame);
-            missile.isExploding = true;
-            t.addDamage(10);
+    
+        myTeam = 1;
+        selectedTankIndex = -1;
+        let tanks = [];
+    
+        game.objects.push(
+          new GameObject(ctx, { angle: 50, position: { x: 230, y: 120 }, width: 50, height: 50 })
+        );
+    
+        /////////////////////////////////////////////////////////////
+    
+        options = {
+          position: { x: 325, y: 215 },
+          moveToPos: { x: 325, y: 215 },
+          wheelLineNum: 2,
+          size: 5,
+          speed: 1,
+          frame: 0,
+          cannonAngle: 0,
+          bodyFill: 'red',
+          id: 0,
+        }
+    
+    
+        for (let i = 0; i < 4; i += 1) {
+          //debugger;
+          let opts = JSON.parse(JSON.stringify(options));
+          opts.position.y += i * 130;
+          opts.moveToPos.y += i * 130;
+          opts.team = i + 1;
+          opts.id+= i;
+          let tank = new Tank(ctx, opts);
+          tanks.push(tank);
+        }
+    
+    
+        canvas.addEventListener('click', (event) => {
+          const rect = canvas.getBoundingClientRect();
+          const position = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+          let isClicked = false;
+    
+          tanks.forEach((t, index) => {
+    
+            t.selected = false;
+            if (t.checkIfClicked(position)) {
+              if (t.team === myTeam) {
+    
+                // if (index === selectedTankIndex) {
+                //   tanks[selectedTankIndex].fireMissile(ctx)
+                // }
+                selectedTankIndex = index;
+                isClicked = true;
+    
+              }
+              else{
+                tanks[selectedTankIndex].targetPos =  position;
+                tanks[selectedTankIndex].isFiring = true;
+                //tanks[selectedTankIndex].addDamage(10);
+                //tanks[selectedTankIndex].fireMissileTo(ctx);
+                isClicked = true;
+              }
+            }
+    
+          
+    
+    
+          });
+    
+          // Move the selected tank to the clicked point
+          if (!isClicked) {
+            tanks[selectedTankIndex].moveToPos = position;
+            // tanks[selectedTankIndex].fireMissile(ctx);
           }
-
+          tanks[selectedTankIndex].selected = true;
+    
+    
         });
-
-        if (selectedTankIndex > -1 && selectedTankIndex !== index && t.detectCollision(tanks[selectedTankIndex])) {
-          tanks[selectedTankIndex].moveToPos = tanks[selectedTankIndex].position;
-          t.collide(tanks[selectedTankIndex]);
-          tanks[selectedTankIndex].collide(t);
-          //t.moveToPos  = JSON.parse(JSON.stringify(t.position));
-          t.moveToPos = t.position;
+    
+    
+        console.log(tanks)
+        setInterval(function () {
+          //console.time('Game Loop')
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+        
+    
+          tanks.forEach((t, index) => {
+    
+            if(t.isDestroyed){
+              tanks.splice(index,1)
+            }
+        
+        
+            game.missiles.forEach((missile, index) => {
+              if( missile.owner !== t.id && t.detectCollision(missile) && !missile.isExploding){
+                missile.isExploding = true;
+                t.addDamage(10);
+              }
+            });
+    
+            tanks.forEach((tank, tankIndex) => {
+              if(tankIndex !== index &&  t.detectCollision(tank) ) {
+                t.collide(tank);
+                tank.collide(t);
+                t.moveToPos = t.position;          
+              }
+            });
+    
+            // if (selectedTankIndex > -1 && selectedTankIndex !== index && t.detectCollision(tanks[selectedTankIndex])) {
+            //   tanks[selectedTankIndex].moveToPos = tanks[selectedTankIndex].position;
+            //   t.collide(tanks[selectedTankIndex]);
+            //   tanks[selectedTankIndex].collide(t);
+            //   t.moveToPos = t.position;
+            // }
+    
+            t.moveTo();
+          });
+    
+    
+          game.missiles.forEach((missile, index) => {
+            if( missile.hasExploded ){
+              game.missiles.splice(index,1)
+            }
+            missile.render();
+          });
+    
+    
+          game.objects.forEach(obj => {
+    
+            tanks.forEach((t, index) => {
+    
+              if (t.detectCollision(obj)) {
+                t.collide(obj)
+                t.moveToPos = t.position;
+              }
+            })
+            obj.render()
+    
+            //obj.update(game.missiles)
+    
+          });
+    
+    
+    
+    
+    
+          //console.timeEnd('Game Loop')
+        }, 10);
+    
+    
+        document.getElementById('shoot').onclick = function () {
+          //alert('yo')
+          tanks[0].fireMissile(ctx);
         }
-
-        t.moveTo();
-      });
-
-
-      game.missiles.forEach((missile, index) => {
-        if( missile.hasExploded ){
-          game.missiles.splice(index,1)
-        }
-        missile.render();
-      });
-
-
-      game.objects.forEach(obj => {
-
-        tanks.forEach((t, index) => {
-
-          if (t.detectCollision(obj)) {
-            t.collide(obj)
-            t.moveToPos = t.position;
-          }
-        })
-        obj.render()
-
-        //obj.update(game.missiles)
-
-      });
-
-
-
-
-
-      //console.timeEnd('Game Loop')
-    }, 10);
-
-
-
-
-
-
-
-    document.getElementById('shoot').onclick = function () {
-      //alert('yo')
-      tanks[0].fireMissile(ctx);
-    }
-
-
+    
+    
+    ***************/
 
   </script>
 </body>
