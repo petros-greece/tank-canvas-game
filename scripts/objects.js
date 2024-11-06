@@ -2,20 +2,21 @@ class GameObject{
 
     constructor(ctx, options = {}) {
         this.ctx = ctx;
-        this.position = options.position || { x: 100, y: 100 };  // Default position if none provided
+        this.position = options.position;  // Default position if none provided
         this.width = options.width || 30;  // Default width of the object
         this.height = options.height || 30;  // Default height of the object
         this.color = options.color || "#4CAF50";  // Default color
         this.isColliding = false;  // Track collision state
         this.comp = {}
         this.speed = 0;
-        this.angle = options.angle || 10;
+        this.angle = options.angle || 0;
         this.init();
     }
     
     init(){
         this.comp.halfW = this.width/2;
         this.comp.halfH = this.height/2;
+        this.position = this.position ? this.position : {x: this.comp.halfW, y: this.comp.halfH }
     }
     
     // Render the game object
@@ -105,5 +106,6 @@ class GameObject{
             }
         ];
     };
+
 }
 
