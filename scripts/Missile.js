@@ -1,4 +1,6 @@
-function Missile(ctx, options = {}) {
+class Missile {
+
+  constructor(ctx, options = {}) {
     // Set up position with default values
     this.ctx = ctx;
     this.angle = options.angle || 90;
@@ -17,14 +19,14 @@ function Missile(ctx, options = {}) {
     this.init()
   }
 
-  Missile.prototype.init = function(){
-    this.comp.halfW = this.width/2;
-    this.comp.halfH = this.height/2;
+  init() {
+    this.comp.halfW = this.width / 2;
+    this.comp.halfH = this.height / 2;
   }
 
-  Missile.prototype.render = function () {
+  render() {
     if (!this.hasExploded) {
-      
+
       if (this.isExploding) {
         this.renderExplosion();
       } else {
@@ -34,12 +36,12 @@ function Missile(ctx, options = {}) {
     }
   };
 
-  Missile.prototype.renderBody = function (ctx) {
+  renderBody(ctx) {
     ctx.save(); // Save the current state
 
     // Move the canvas origin to the missile's center
-    ctx.translate(this.position.x, this.position.y); 
-    ctx.rotate( (this.angle+90) * (Math.PI / 180) ); // Rotate the canvas by the missile's angle
+    ctx.translate(this.position.x, this.position.y);
+    ctx.rotate((this.angle + 90) * (Math.PI / 180)); // Rotate the canvas by the missile's angle
 
     // Draw the missile body
     ctx.fillStyle = "#555";
@@ -59,8 +61,8 @@ function Missile(ctx, options = {}) {
 
     ctx.restore(); // Restore the original state
   };
-  
-  Missile.prototype.renderFlame = function (ctx, x, y) {
+
+  renderFlame(ctx, x, y) {
     // Alternate the flame size for a flickering effect
     let flameSize = this.flameToggle ? this.width : this.width * 2;
     this.flameToggle = !this.flameToggle;
@@ -81,12 +83,12 @@ function Missile(ctx, options = {}) {
     ctx.fill();
   };
 
-  Missile.prototype.explode = function () {
+  explode() {
     this.isExploding = true;  // Set the explosion state
     this.explosionRadius = 0; // Start the explosion radius at 0
   };
 
-  Missile.prototype.renderExplosion = function () {
+  renderExplosion() {
     const maxRadius = 30; // Maximum radius for the explosion effect
     const fadeOutRadius = 40; // Radius at which the explosion will start to fade
 
@@ -124,7 +126,9 @@ function Missile(ctx, options = {}) {
     }
   };
 
-  Missile.prototype.move = function(){
+  move() {
     this.position.x += Math.cos(this.angle * (Math.PI / 180)) * this.speed;
     this.position.y += Math.sin(this.angle * (Math.PI / 180)) * this.speed;
   }
+
+}
