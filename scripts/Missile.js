@@ -12,6 +12,7 @@ function Missile(ctx, options = {}) {
     this.explosionRadius = 0;  // Radius of the explosion effect
     this.hasExploded = false;
     this.speed = 16;
+    this.owner = options.owner || 'nobody';
     this.comp = {}
     this.init()
   }
@@ -119,8 +120,7 @@ function Missile(ctx, options = {}) {
 
     // End explosion effect after reaching the fade-out radius
     if (this.explosionRadius > fadeOutRadius) {
-      this.isExploding = false; // Reset explosion state
-      this.explosionRadius = 0;  // Reset radius
+      this.hasExploded = true;
     }
   };
 

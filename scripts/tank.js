@@ -1,6 +1,7 @@
 function Tank(ctx, options = {}) {
     this.ctx = ctx;
     this.team = options.team || 1;
+    this.id = options.id ? `tank_${options.id}` : 'tank_0';
     // Set up position with default values
     this.position = this.position || {};
     this.position.x = options.position.x;  // Default x position
@@ -25,7 +26,9 @@ function Tank(ctx, options = {}) {
     this.cannonAngle = options.cannonAngle ?? 0;
     this.frame = Math.floor(Math.random() * 10);
     this.weight = 1000;
+
     this.armor = 100;
+    this.damage = 0;
 
     this.selected = false;
     this.stopped = false;
@@ -33,10 +36,6 @@ function Tank(ctx, options = {}) {
     this.comp = {};
     this.init();
 }
-
-
-
-
 
 /** PALLETE ******************************************** */
 
@@ -65,12 +64,15 @@ Tank.prototype.render = function () {
     if(this.isFiring){
         this.fireMissileTo(ctx);
     }
+    if(this.isExploding){
+        this.renderExplosion();
+    }
 
 }
 
 Tank.prototype.renderCannon = function (ctx, size) {
     ctx.save();
-    ctx.rotate((this.cannonAngle - this.angle ) * (Math.PI / 180));
+    ctx.rotate((this.cannonAngle ) * (Math.PI / 180));
     ctx.fillStyle = this.cannonFill;
     ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
     ctx.restore();
@@ -102,9 +104,10 @@ Tank.prototype.renderBody = function (ctx, size) {
     ctx.fillStyle = this.bodyFill;
     ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
     
-    ctx.fillStyle = `rgba(5,5,5,${this.comp.damage/this.armor})`;
-    ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
-    //this.comp.damage
+    ctx.fillStyle = `rgba(5,5,5,${this.comp.damage})`;
+    ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width*this.comp.damage, this.comp.halfW);
+    
+    //console.log(this.comp.damage, this.damage, this.armor);
 
     // Draw tank tower
     ctx.fillStyle = this.towerFill;
@@ -159,6 +162,7 @@ Tank.prototype.moveTo = function () {
             this.angle -= Math.min(rotationSpeed, -angleDifference); // Rotate counterclockwise
         }
         this.angle = (this.angle + 360) % 360; // Keep angle normalized within [0, 360)
+        this.frame += 1;
     }
 
     // Move forward or backward if aligned within tolerance of the target direction
@@ -167,11 +171,11 @@ Tank.prototype.moveTo = function () {
         const direction = moveBackward ? -1 : 1;
         this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed * direction;
         this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed * direction;
+        this.frame += 1;
     }
 
     this.draw();
 };
-
 
 Tank.prototype.draw = function () {
     // Draw tank with the updated position and angle
@@ -250,53 +254,121 @@ Tank.prototype.stop = function(){
     this.moveToPos = JSON.parse(JSON.stringify(this.position));
 }
 
+/** DAMAGING ***************************************************************** */
+
+Tank.prototype.addDamage = function(power){
+    if(this.comp.damage >= 1){
+        this.explode();
+        return;
+    }
+    this.damage += power;
+    this.comp.damage =  this.damage/this.armor;
+
+}
+
+Tank.prototype.explode = function () {
+    this.isExploding = true;    // Flag to start the explosion
+    this.explosionRadius = 0;   // Start radius for the explosion
+    this.explosionMaxRadius = this.width * 2; // Maximum radius of the explosion
+    this.explosionFadeOutRadius = this.width; // Radius at which the explosion starts to fade
+};
+
+// Method to render the explosion effect
+Tank.prototype.renderExplosion = function () {
+    const ctx = this.ctx;
+
+    // Increase the explosion radius over time
+    this.explosionRadius += 1;
+
+    // Create a radial gradient for the explosion effect
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.explosionRadius);
+
+    // Colors for the explosion effect, fading as the radius increases
+    gradient.addColorStop(0, "rgba(255, 69, 0, 1)");   // Center bright orange
+    gradient.addColorStop(0.5, "rgba(255, 140, 0, 0.8)"); // Outer orange
+    gradient.addColorStop(1, "rgba(255, 69, 0, 0)");  // Transparent edge
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.explosionRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Restore the context's previous state
+    //ctx.restore();
+
+    // End the explosion effect once it exceeds the fade-out radius
+    if (this.explosionRadius > this.explosionFadeOutRadius) {
+        this.isExploding = false;  // Stop the explosion
+        this.explosionRadius = 0;  // Reset the explosion radius
+        this.destroy(); // Optional: Handle tank destruction
+    }
+};
+
+Tank.prototype.destroy = function () {
+    this.isDestroyed = true; // Flag to destroy the tank
+};
+
 /** UI ******************************************** */
 
-
-
 Tank.prototype.fireMissile = function (ctx) {
+        let cannonGlobalAngle = (this.angle + this.cannonAngle) % 360;
         // Create and initialize the missile
         let missile = new Missile(ctx, {
             position: {
                 x: this.position.x,
                 y: this.position.y
             },
-            angle: this.cannonAngle,  // Set missile angle to match the cannon's angle
+            angle: cannonGlobalAngle,  // Set missile angle to match the cannon's angle
             width: this.size,
-            height: this.size * 4
+            height: this.size * 4,
+            owner: this.id
         });
 
         // Add the missile to the game's missiles array
         game.missiles.push(missile);
 }
 
-Tank.prototype.fireMissileTo = function (ctx) { 
-    this.stop();
-    this.isFiring = true;
 
+
+Tank.prototype.fireMissileTo = function (ctx) {
     // Calculate the angle to the target position
     const dx = this.targetPos.x - this.position.x;
     const dy = this.targetPos.y - this.position.y;
-    this.comp.targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Convert radians to degrees
+    const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Target angle in degrees
+
+    // Account for the tank's rotation by adding the base angle
+    let cannonGlobalAngle = (this.angle + this.cannonAngle) % 360;
+
+    // Normalize cannonGlobalAngle and targetAngle to [-180, 180) for consistent comparisons
+    if (cannonGlobalAngle > 180) cannonGlobalAngle -= 360;
+    if (cannonGlobalAngle < -180) cannonGlobalAngle += 360;
+
+    let normalizedTargetAngle = ((targetAngle % 360) + 360) % 360;
+    if (normalizedTargetAngle > 180) normalizedTargetAngle -= 360;
+
+    // Calculate the shortest angle difference
+    let angleDifference = normalizedTargetAngle - cannonGlobalAngle;
+
+    // Ensure the shortest path for rotation by adjusting the angle difference
+    if (angleDifference > 180) angleDifference -= 360;
+    if (angleDifference < -180) angleDifference += 360;
 
     const rotationStep = 1; // Degrees to rotate per frame
 
-    // Calculate angle difference and normalize to [-180, 180] range
-    let angleDifference = this.comp.targetAngle - this.cannonAngle;
-    angleDifference = normalizeAngleDifference(angleDifference);
-
-    console.log(`Angle Difference: ${angleDifference}`); // Debugging output to verify normalization
-
-    // Rotate the tank's cannon gradually
+    // Gradually adjust cannon angle to match target direction
     if (Math.abs(angleDifference) > rotationStep) {
-        // Rotate by one degree in the shortest direction
-        this.cannonAngle += (angleDifference > 0 ? rotationStep : -rotationStep);
+        this.cannonAngle += angleDifference > 0 ? rotationStep : -rotationStep;
     } else {
-        // Snap to target angle and fire if aligned within tolerance
-        this.cannonAngle = this.comp.targetAngle;
-        this.isFiring = false;
+        // Snap the cannon to the target direction once aligned
+        this.cannonAngle += angleDifference;
+        // Fire missile once aligned with target position
         this.fireMissile(ctx);
+        this.isFiring = false; // Stop firing once aligned with target direction
     }
+
+    // Normalize the cannon angle to keep within [-180, 180)
+    this.cannonAngle = ((this.cannonAngle % 360) + 360) % 360;
+    if (this.cannonAngle > 180) this.cannonAngle -= 360;
 };
 
 

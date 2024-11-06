@@ -62,7 +62,8 @@
       speed: 1,
       frame: 0,
       cannonAngle: 0,
-      bodyFill: 'red'
+      bodyFill: 'red',
+      id: 0,
     }
 
 
@@ -72,10 +73,10 @@
       opts.position.y += i * 130;
       opts.moveToPos.y += i * 130;
       opts.team = i + 1;
+      opts.id+= i;
       let tank = new Tank(ctx, opts);
       tanks.push(tank);
     }
-
 
 
     canvas.addEventListener('click', (event) => {
@@ -84,6 +85,7 @@
       let isClicked = false;
 
       tanks.forEach((t, index) => {
+
         t.selected = false;
         if (t.checkIfClicked(position)) {
           if (t.team === myTeam) {
@@ -98,10 +100,13 @@
           else{
             tanks[selectedTankIndex].targetPos =  position;
             tanks[selectedTankIndex].isFiring = true;
+            //tanks[selectedTankIndex].addDamage(10);
             //tanks[selectedTankIndex].fireMissileTo(ctx);
             isClicked = true;
           }
         }
+
+      
 
 
       });
@@ -117,15 +122,33 @@
     });
 
 
+    console.log(tanks)
     setInterval(function () {
       //console.time('Game Loop')
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      game.missiles.forEach((m, index) => {
-        m.render();
-      });
+    
 
       tanks.forEach((t, index) => {
+
+        if(t.isDestroyed){
+          tanks.splice(index,1)
+        }
+       // console.log( t.id)
+
+       //console.log(tanks[0].frame);
+        game.missiles.forEach((missile, index) => {
+          //console.log(index)
+          if( missile.owner !== t.id && 
+              t.detectCollision(missile) && 
+              !missile.isExploding){
+            //console.log(tanks[0].frame);
+            missile.isExploding = true;
+            t.addDamage(10);
+          }
+
+        });
+
         if (selectedTankIndex > -1 && selectedTankIndex !== index && t.detectCollision(tanks[selectedTankIndex])) {
           tanks[selectedTankIndex].moveToPos = tanks[selectedTankIndex].position;
           t.collide(tanks[selectedTankIndex]);
@@ -137,6 +160,13 @@
         t.moveTo();
       });
 
+
+      game.missiles.forEach((missile, index) => {
+        if( missile.hasExploded ){
+          game.missiles.splice(index,1)
+        }
+        missile.render();
+      });
 
 
       game.objects.forEach(obj => {
