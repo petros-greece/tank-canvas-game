@@ -38,7 +38,7 @@ function Missile(ctx, options = {}) {
     ctx.save(); // Save the current state
 
     // Move the canvas origin to the missile's center
-    ctx.translate(this.position.x + this.comp.halfW, this.position.y + this.comp.halfH);
+    ctx.translate(this.position.x, this.position.y); 
     ctx.rotate( (this.angle+90) * (Math.PI / 180) ); // Rotate the canvas by the missile's angle
 
     // Draw the missile body
