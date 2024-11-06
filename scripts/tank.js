@@ -32,6 +32,7 @@ function Tank(ctx, options = {}) {
 
     this.selected = false;
     this.stopped = false;
+    this.automated = false;
     // Component object for calculations or stored dimensions
     this.comp = {};
     this.init();
@@ -278,7 +279,7 @@ Tank.prototype.renderExplosion = function () {
     const ctx = this.ctx;
 
     // Increase the explosion radius over time
-    this.explosionRadius += 1;
+    this.explosionRadius += 2;
 
     // Create a radial gradient for the explosion effect
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.explosionRadius);
@@ -393,6 +394,20 @@ Tank.prototype.checkIfClicked = function (position) {
 };
 
 
+/** AUTOMATION *********************************************/
+
+
+
+/**
+ * automate shooting.
+ * should draw a line towards the target, check is any obstacles on the way
+ * if the is no obstacles, shoot, or else find a way to rich the target when
+ * cabaple to shoot at him.
+ * 
+ * 
+ * 
+ * 
+ */
 
 
 
