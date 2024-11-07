@@ -35,7 +35,7 @@ class Tank {
         this.damage = 0;
 
         this.selected = false;
-        this.stopped = false;
+        this.isStopped = false;
         this.automated = false;
         // Component object for calculations or stored dimensions
         this.comp = {};
@@ -71,7 +71,6 @@ class Tank {
         this.renderCannon(ctx, size);
 
         if (this.isFiring) {
-            this.stop();
             this.fireMissileTo(ctx);
         }
         if (this.isExploding) {
@@ -136,6 +135,11 @@ class Tank {
     }
 
     moveTo() {
+        if(this.isFiring || this.isStopped) {
+            this.draw();
+            return;
+        }
+       
         const dx = this.moveToPos.x - this.position.x;
         const dy = this.moveToPos.y - this.position.y;
         const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Target angle in degrees
@@ -183,9 +187,19 @@ class Tank {
             this.position.y += Math.sin(this.angle * (Math.PI / 180)) * moveSpeed * direction;
             this.frame += 1;
         }
-
+        
         this.draw();
     };
+
+    stop() {
+        this.isStopped = true;
+        this.moveToPos = JSON.parse(JSON.stringify(this.position));
+        this.angle =  JSON.parse(JSON.stringify(this.angle))
+    };
+
+    go(){
+        this.isStopped = false;
+    }
 
     draw() {
         // Draw tank with the updated position and angle
@@ -195,7 +209,8 @@ class Tank {
         ctx.rotate(this.angle * (Math.PI / 180));
         this.render();
         ctx.restore();
-    }
+    };
+    
 
     /** COLLISIONS ******************************************** */
 
@@ -260,9 +275,7 @@ class Tank {
 
     }
 
-    stop() {
-        this.moveToPos = JSON.parse(JSON.stringify(this.position));
-    }
+
 
     /** DAMAGING ***************************************************************** */
 
@@ -321,6 +334,7 @@ class Tank {
     /** FIRING ******************************************** */
 
     fireMissile(ctx) {
+        
         let cannonGlobalAngle = (this.angle + this.cannonAngle) % 360;
         // Create and initialize the missile
         let missile = new Missile(ctx, {
@@ -343,7 +357,7 @@ class Tank {
         const dx = this.targetPos.x - this.position.x;
         const dy = this.targetPos.y - this.position.y;
         const targetAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Target angle in degrees
-
+        //log(' fireMissileTo Tank is firing: '+this.isFiring);
         // Account for the tank's rotation by adding the base angle
         let cannonGlobalAngle = (this.angle + this.cannonAngle) % 360;
 
@@ -372,6 +386,7 @@ class Tank {
             // Fire missile once aligned with target position
             this.fireMissile(ctx, missiles);
             this.isFiring = false; // Stop firing once aligned with target direction
+           
         }
 
         // Normalize the cannon angle to keep within [-180, 180)

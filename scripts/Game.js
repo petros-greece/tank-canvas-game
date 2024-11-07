@@ -150,7 +150,7 @@ class Game {
 		//this.missiles = [];
 			//console.timeEnd('Game Loop')
 
-		}, 20);
+		}, 10);
 
 	}
 
@@ -162,17 +162,23 @@ class Game {
 			const position = { x: event.clientX - rect.left, y: event.clientY - rect.top }
 			const tanks = this.tanks;
 			let isClicked = false;
+			let isFiring = false;
 
+		
 			this.worldObjects.forEach((obj) => {
-				if ( checkIfClicked(position, obj) )  {
+				if ( checkIfClicked(position, obj) )  {	
+					isFiring = true;
+					tanks[selectedTankIndex].stop();
 					tanks[selectedTankIndex].targetPos =  position;
 					tanks[selectedTankIndex].isFiring = true;
+			
 				}
 			});
 
 			tanks.forEach((t, index) => {
 
 				t.selected = false;
+				
 				if ( checkIfClicked(position, t) )  {
 					if (t.team === this.team) {
 
@@ -186,8 +192,10 @@ class Game {
 					else{
 						tanks[selectedTankIndex].targetPos =  position;
 						tanks[selectedTankIndex].isFiring = true;
+						tanks[selectedTankIndex].stop();
 						//tanks[selectedTankIndex].addDamage(10);
 						//tanks[selectedTankIndex].fireMissileTo(ctx);
+						isFiring = true;
 						isClicked = true;
 					}
 				}
@@ -198,9 +206,9 @@ class Game {
 			});
 
 			// Move the selected tank to the clicked point
-			if (!isClicked) {
+			if (!isClicked && !isFiring) {
 				this.tanks[selectedTankIndex].moveToPos = position;
-				// tanks[selectedTankIndex].fireMissile(ctx);
+				this.tanks[selectedTankIndex].go();
 			}
 			this.tanks[selectedTankIndex].selected = true;
 

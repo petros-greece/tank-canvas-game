@@ -13,7 +13,7 @@ class Missile {
     this.isExploding = false;  // Explosion state
     this.explosionRadius = 0;  // Radius of the explosion effect
     this.hasExploded = false;
-    this.speed = 10;
+    this.speed = 16;
     this.owner = options.owner || 'nobody';
     this.comp = {}
     this.init()
@@ -89,6 +89,7 @@ class Missile {
   };
 
   renderExplosion() {
+    this.isExploding = true;
     const maxRadius = 30; // Maximum radius for the explosion effect
     const fadeOutRadius = 40; // Radius at which the explosion will start to fade
 

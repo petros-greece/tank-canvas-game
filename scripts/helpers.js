@@ -77,3 +77,34 @@ function checkIfClicked(position, body) {
     // Returns true if within bounds, false otherwise
     return isWithinBounds;
 };
+
+function detectCollision(gameObject, otherGameObject) {
+    // Get rotated corners of tank and gameObject
+    const tankCorners = getRotatedCorners(otherGameObject);
+    const objectCorners = getRotatedCorners(gameObject);
+
+    // All edges of both objects, treated as axes to project onto
+    const edges = [
+        { x: tankCorners[1].x - tankCorners[0].x, y: tankCorners[1].y - tankCorners[0].y },
+        { x: tankCorners[1].x - tankCorners[2].x, y: tankCorners[1].y - tankCorners[2].y },
+        { x: objectCorners[0].x - objectCorners[1].x, y: objectCorners[0].y - objectCorners[1].y },
+        { x: objectCorners[1].x - objectCorners[2].x, y: objectCorners[1].y - objectCorners[2].y }
+    ];
+
+    // Check all edges as potential separating axes
+    for (const edge of edges) {
+        const axis = { x: -edge.y, y: edge.x }; // Perpendicular axis to the edge
+
+        // Project both polygons onto the axis
+        const tankProjection = projectPolygon(tankCorners, axis);
+        const objectProjection = projectPolygon(objectCorners, axis);
+
+        // If there's no overlap on this axis, there's no collision
+        if (!projectionsOverlap(tankProjection.min, tankProjection.max, objectProjection.min, objectProjection.max)) {
+            return false; // Separating axis found, no collision
+        }
+    }
+
+    // No separating axis found, collision detected
+    return true;
+};
