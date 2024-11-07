@@ -29,6 +29,7 @@ class Game {
 			maxTanks: 5,
 			stageBackground: "#333",
 		};
+
 		this.builder = new WorldBuilder(canvas);
 		this.worldBuilders = options.worldBuilders || [];
 		this.worldObjects = options.worldObjects || [];
@@ -48,14 +49,12 @@ class Game {
 			// Create a new GameObject for each set of options and render it
 			objs.forEach((opts) => {
 				const gameObject = new GameObject(ctx, opts); // Create a new GameObject with the options
-				//gameObject.render(); // Render the object on the context
 				this.worldObjects.push(gameObject); // Add the object to the worldObjects array
 			});
 		})
 
 
 		this.tankOpts.forEach((tankOpts) => {
-			//console.log(this);
 			const tank = new Tank(ctx, tankOpts, this); // Create a new Tank with the options 
 			this.tanks.push(tank); // Add the tank to the tanks array
 		});
@@ -75,8 +74,8 @@ class Game {
 			//console.time('Game Loop')
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
 			
+			// TANKS /////////////////////////////////////////////////////
 
 			this.tanks.forEach((t, index) => {
     
@@ -86,51 +85,52 @@ class Game {
 		
 		
 				this.missiles.forEach((missile, index) => {
-					if( missile.owner !== t.id && t.detectCollision(missile) && !missile.isExploding){
+					if( missile.owner !== t.id && detectCollision(missile, t) && !missile.isExploding){
 						missile.isExploding = true;
 						t.addDamage(10);
 					}
 				});
 
 				this.tanks.forEach((tank, tankIndex) => {
-					if(tankIndex !== index &&  t.detectCollision(tank) ) {
+					if(tankIndex !== index &&  detectCollision(tank, t) ) {
 						t.collide(tank);
 						tank.collide(t);
 						t.moveToPos = t.position;          
 					}
 				});
 
-				// if (selectedTankIndex > -1 && selectedTankIndex !== index && t.detectCollision(tanks[selectedTankIndex])) {
-				//   tanks[selectedTankIndex].moveToPos = tanks[selectedTankIndex].position;
-				//   t.collide(tanks[selectedTankIndex]);
-				//   tanks[selectedTankIndex].collide(t);
-				//   t.moveToPos = t.position;
-				// }
-		
-				t.moveTo();
+				t.move();
 				
-
 			});
 
+			// OBJECTS /////////////////////////////////////////////////
 
 			this.worldObjects.forEach(obj => {
     
 				this.tanks.forEach((t, index) => {
-
-					if (t.detectCollision(obj)) {
-						t.collide(obj)
-						t.moveToPos = t.position;
+					
+					if (detectCollision(t, obj)) {
+						t.collide(obj);
+						//t.moveToPos = t.position;
 					}
+					
 				})
 
 
 				this.missiles.forEach((missile, index) => {
-					if( missile.owner !== obj.id && obj.detectCollision(missile) && !missile.isExploding){
+					if( missile.owner !== obj.id && detectCollision(missile, obj) && !missile.isExploding){
 						missile.isExploding = true;
-						//t.addDamage(10);
-						//missile.renderExplosion();
+						obj.getHit(missile);
 					}
 				});
+
+
+				this.worldObjects.forEach(o => {
+					if( detectCollision(o, obj) ){
+						obj.collide(o)
+						
+					}
+				})
 
 
 				obj.render()
@@ -138,6 +138,9 @@ class Game {
 				//obj.update(game.missiles)
 
 			});
+
+
+			// 	MISSILES /////////////////////////////////////////////////////////
 
 			this.missiles.forEach((missile, index) => {
 				if( missile.hasExploded ){
@@ -147,7 +150,7 @@ class Game {
 			});
 
 
-		//this.missiles = [];
+		
 			//console.timeEnd('Game Loop')
 
 		}, 10);

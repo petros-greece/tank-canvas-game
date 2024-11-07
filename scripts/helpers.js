@@ -80,13 +80,13 @@ function checkIfClicked(position, body) {
 
 function detectCollision(gameObject, otherGameObject) {
     // Get rotated corners of tank and gameObject
-    const tankCorners = getRotatedCorners(otherGameObject);
+    const otherCorners = getRotatedCorners(otherGameObject);
     const objectCorners = getRotatedCorners(gameObject);
 
     // All edges of both objects, treated as axes to project onto
     const edges = [
-        { x: tankCorners[1].x - tankCorners[0].x, y: tankCorners[1].y - tankCorners[0].y },
-        { x: tankCorners[1].x - tankCorners[2].x, y: tankCorners[1].y - tankCorners[2].y },
+        { x: otherCorners[1].x - otherCorners[0].x, y: otherCorners[1].y - otherCorners[0].y },
+        { x: otherCorners[1].x - otherCorners[2].x, y: otherCorners[1].y - otherCorners[2].y },
         { x: objectCorners[0].x - objectCorners[1].x, y: objectCorners[0].y - objectCorners[1].y },
         { x: objectCorners[1].x - objectCorners[2].x, y: objectCorners[1].y - objectCorners[2].y }
     ];
@@ -96,11 +96,11 @@ function detectCollision(gameObject, otherGameObject) {
         const axis = { x: -edge.y, y: edge.x }; // Perpendicular axis to the edge
 
         // Project both polygons onto the axis
-        const tankProjection = projectPolygon(tankCorners, axis);
+        const otherProjection = projectPolygon(otherCorners, axis);
         const objectProjection = projectPolygon(objectCorners, axis);
 
         // If there's no overlap on this axis, there's no collision
-        if (!projectionsOverlap(tankProjection.min, tankProjection.max, objectProjection.min, objectProjection.max)) {
+        if (!projectionsOverlap(otherProjection.min, otherProjection.max, objectProjection.min, objectProjection.max)) {
             return false; // Separating axis found, no collision
         }
     }
@@ -108,3 +108,23 @@ function detectCollision(gameObject, otherGameObject) {
     // No separating axis found, collision detected
     return true;
 };
+
+function getClosestObject(objects) {
+    let closestObject = null;
+    let minDistance = Infinity;
+
+    objects.forEach(obj => {
+        if (obj !== this) {  // Avoid comparing the object to itself
+            const dx = obj.position.x - this.position.x;
+            const dy = obj.position.y - this.position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);  // Euclidean distance
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestObject = obj;
+            }
+        }
+    });
+
+    return closestObject;
+}

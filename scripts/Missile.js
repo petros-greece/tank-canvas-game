@@ -14,6 +14,7 @@ class Missile {
     this.explosionRadius = 0;  // Radius of the explosion effect
     this.hasExploded = false;
     this.speed = 16;
+    this.weight = 100;
     this.owner = options.owner || 'nobody';
     this.comp = {}
     this.init()

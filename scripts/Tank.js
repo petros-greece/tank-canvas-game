@@ -10,9 +10,7 @@ class Tank {
         this.position = this.position || {};
         this.position.x = options.position.x || 200;  // Default x position
         this.position.y = options.position.y || 200; // Default y position
-        this.moveToPos = options.moveToPos || {};
-        this.moveToPos.x = options.moveToPos.x;
-        this.moveToPos.y = options.moveToPos.y;
+        this.moveToPos = options.moveToPos  || { ...this.position };
         this.targetPos = {};
         // Assign other tank properties with option values or defaults
         this.bodyFill = options.bodyFill ?? "rgba(100,100,100,1)";
@@ -35,10 +33,12 @@ class Tank {
         this.damage = 0;
 
         this.selected = false;
+        this.isColliding = false;
         this.isStopped = false;
         this.automated = false;
         // Component object for calculations or stored dimensions
         this.comp = {};
+        this.moveMethod = options.moveMethod ?? this.moveTo;
         this.init();
     }
 
@@ -57,18 +57,12 @@ class Tank {
     }
 
     render() {
-
         const size = this.size;
         const ctx = this.ctx;
-
-        // if (this.automated) {
-        //     this.render
-        // }
-
-        this.renderSelection(ctx);
-        this.renderBody(ctx, size);
-        this.renderTracks(ctx, size);
-        this.renderCannon(ctx, size);
+        this.drawSelection(ctx);
+        this.drawBody(ctx, size);
+        this.drawTracks(ctx, size);
+        this.drawCannon(ctx, size);
 
         if (this.isFiring) {
             this.fireMissileTo(ctx);
@@ -79,7 +73,7 @@ class Tank {
 
     }
 
-    renderCannon(ctx, size) {
+    drawCannon(ctx, size) {
         ctx.save();
         ctx.rotate((this.cannonAngle) * (Math.PI / 180));
         ctx.fillStyle = this.cannonFill;
@@ -87,7 +81,7 @@ class Tank {
         ctx.restore();
     }
 
-    renderTracks(ctx, size) {
+    drawTracks(ctx, size) {
         // Draw tracks
         ctx.fillStyle = this.wheelTracksFill;
         ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, 2 * size); // Upper track
@@ -108,7 +102,7 @@ class Tank {
         ctx.stroke();
     }
 
-    renderBody(ctx, size) {
+    drawBody(ctx, size) {
         // Draw tank body
         ctx.fillStyle = this.bodyFill;
         ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
@@ -125,7 +119,7 @@ class Tank {
         ctx.fill();
     }
 
-    renderSelection(ctx) {
+    drawSelection(ctx) {
         if (this.selected) {
             ctx.fillStyle = this.selectionColor;
             ctx.beginPath();
@@ -133,6 +127,17 @@ class Tank {
             ctx.fill();
         }
     }
+
+    draw() {
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.translate(this.position.x, this.position.y);
+        ctx.rotate(this.angle * (Math.PI / 180));
+        this.render();
+        ctx.restore();
+    };
+
+    /** MOVEMENT ******************************************** */
 
     moveTo() {
         if(this.isFiring || this.isStopped) {
@@ -201,81 +206,24 @@ class Tank {
         this.isStopped = false;
     }
 
-    draw() {
-        // Draw tank with the updated position and angle
-        const ctx = this.ctx;
-        ctx.save();
-        ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.angle * (Math.PI / 180));
-        this.render();
-        ctx.restore();
-    };
-    
-
-    /** COLLISIONS ******************************************** */
-
     collide(obj) {
         const dx = this.position.x - obj.position.x;
         const dy = this.position.y - obj.position.y;
         const collisionAngle = Math.atan2(dy, dx);
 
-        this.position.x += Math.cos(collisionAngle) * obj.speed * 2;
-        this.position.y += Math.sin(collisionAngle) * obj.speed * 2;
+        this.position.x += Math.cos(collisionAngle)  * obj.weight/1000;
+        this.position.y += Math.sin(collisionAngle)  * obj.weight/1000;
 
-        obj.position.x -= Math.cos(collisionAngle) * this.speed * 2;
-        obj.position.y -= Math.sin(collisionAngle) * this.speed * 2;
+        obj.position.x -= Math.cos(collisionAngle) * this.weight/1000;
+        obj.position.y -= Math.sin(collisionAngle) * this.weight/1000;
         //this.moveTo.y  =  this.position.y
         this.draw();
 
     }
 
-    detectCollision(gameObject) {
-        // Get rotated corners of tank and gameObject
-        const tankCorners = getRotatedCorners(this);
-        const objectCorners = getRotatedCorners(gameObject);
-
-        // All edges of both objects, treated as axes to project onto
-        const edges = [
-            { x: tankCorners[1].x - tankCorners[0].x, y: tankCorners[1].y - tankCorners[0].y },
-            { x: tankCorners[1].x - tankCorners[2].x, y: tankCorners[1].y - tankCorners[2].y },
-            { x: objectCorners[0].x - objectCorners[1].x, y: objectCorners[0].y - objectCorners[1].y },
-            { x: objectCorners[1].x - objectCorners[2].x, y: objectCorners[1].y - objectCorners[2].y }
-        ];
-
-        // Check all edges as potential separating axes
-        for (const edge of edges) {
-            const axis = { x: -edge.y, y: edge.x }; // Perpendicular axis to the edge
-
-            // Project both polygons onto the axis
-            const tankProjection = projectPolygon(tankCorners, axis);
-            const objectProjection = projectPolygon(objectCorners, axis);
-
-            // If there's no overlap on this axis, there's no collision
-            if (!projectionsOverlap(tankProjection.min, tankProjection.max, objectProjection.min, objectProjection.max)) {
-                return false; // Separating axis found, no collision
-            }
-        }
-
-        // No separating axis found, collision detected
-        return true;
-    };
-
-    collideObject(obj) {
-        const dx = this.position.x - obj.position.x;
-        const dy = this.position.y - obj.position.y;
-        const collisionAngle = Math.atan2(dy, dx);
-
-        this.position.x += Math.cos(collisionAngle) * this.speed * 2;
-        this.position.y += Math.sin(collisionAngle) * this.speed * 2;
-
-        obj.position.x -= Math.cos(collisionAngle) * this.speed * 2;
-        obj.position.y -= Math.sin(collisionAngle) * this.speed * 2;
-        //this.moveTo.y  =  this.position.y
-        this.draw();
-
+    move(){
+       this.moveMethod();
     }
-
-
 
     /** DAMAGING ***************************************************************** */
 
@@ -394,9 +342,11 @@ class Tank {
         if (this.cannonAngle > 180) this.cannonAngle -= 360;
     };
 
-
     /** AUTOMATION *********************************************/
 
+    findClosestAndFire(){
+
+    }
 
     
 
