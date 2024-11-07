@@ -1,9 +1,11 @@
 class Tank {
 
-    constructor(ctx, options = {}) {
+    constructor(ctx, options = {}, game) {
         this.ctx = ctx;
         this.team = options.team || 1;
         this.id = options.id ? `tank_${options.id}` : 'tank_0';
+        this.game = game;
+    
         // Set up position with default values
         this.position = this.position || {};
         this.position.x = options.position.x || 200;  // Default x position
@@ -69,6 +71,7 @@ class Tank {
         this.renderCannon(ctx, size);
 
         if (this.isFiring) {
+            this.stop();
             this.fireMissileTo(ctx);
         }
         if (this.isExploding) {
@@ -332,10 +335,10 @@ class Tank {
         });
 
         // Add the missile to the game's missiles array
-        game.missiles.push(missile);
+        this.game.addMissile(missile);
     }
 
-    fireMissileTo(ctx) {
+    fireMissileTo(ctx, missiles) {
         // Calculate the angle to the target position
         const dx = this.targetPos.x - this.position.x;
         const dy = this.targetPos.y - this.position.y;
@@ -367,36 +370,13 @@ class Tank {
             // Snap the cannon to the target direction once aligned
             this.cannonAngle += angleDifference;
             // Fire missile once aligned with target position
-            this.fireMissile(ctx);
+            this.fireMissile(ctx, missiles);
             this.isFiring = false; // Stop firing once aligned with target direction
         }
 
         // Normalize the cannon angle to keep within [-180, 180)
         this.cannonAngle = ((this.cannonAngle % 360) + 360) % 360;
         if (this.cannonAngle > 180) this.cannonAngle -= 360;
-    };
-
-    /** UI ******************************************** */
-
-    checkIfClicked(position) {
-        // Step 1: Translate the click position to the tank's local coordinate system
-        const dx = position.x - this.position.x;
-        const dy = position.y - this.position.y;
-
-        // Step 2: Rotate the click point in the opposite direction of the tank's rotation
-        const angleRad = -this.angle * (Math.PI / 180); // Convert angle to radians
-        const rotatedX = dx * Math.cos(angleRad) - dy * Math.sin(angleRad);
-        const rotatedY = dx * Math.sin(angleRad) + dy * Math.cos(angleRad);
-
-        // Step 3: Check if the rotated click coordinates fall within the tank's rectangular boundaries
-        const isWithinBounds = (
-            rotatedX >= -this.comp.halfW &&
-            rotatedX <= this.comp.halfW &&
-            rotatedY >= -this.comp.halfH &&
-            rotatedY <= this.comp.halfH
-        );
-        // Returns true if within bounds, false otherwise
-        return isWithinBounds;
     };
 
 

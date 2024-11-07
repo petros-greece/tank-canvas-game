@@ -55,7 +55,7 @@ class GameObject{
             missileTop < objBottom
         ) {
             this.isColliding = true;
-            missile.explode();  // Trigger missile explosion on collision
+            //missile.explode();  // Trigger missile explosion on collision
             return true;
         } else {
             this.isColliding = false;

@@ -55,7 +55,8 @@ class Game {
 
 
 		this.tankOpts.forEach((tankOpts) => {
-			const tank = new Tank(ctx, tankOpts); // Create a new Tank with the options 
+			//console.log(this);
+			const tank = new Tank(ctx, tankOpts, this); // Create a new Tank with the options 
 			this.tanks.push(tank); // Add the tank to the tanks array
 		});
 
@@ -74,6 +75,8 @@ class Game {
 			//console.time('Game Loop')
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+
+			
 
 			this.tanks.forEach((t, index) => {
     
@@ -103,8 +106,10 @@ class Game {
 				//   tanks[selectedTankIndex].collide(t);
 				//   t.moveToPos = t.position;
 				// }
-
+		
 				t.moveTo();
+				
+
 			});
 
 
@@ -117,13 +122,33 @@ class Game {
 						t.moveToPos = t.position;
 					}
 				})
+
+
+				this.missiles.forEach((missile, index) => {
+					if( missile.owner !== obj.id && obj.detectCollision(missile) && !missile.isExploding){
+						missile.isExploding = true;
+						//t.addDamage(10);
+						//missile.renderExplosion();
+					}
+				});
+
+
 				obj.render()
 
 				//obj.update(game.missiles)
 
 			});
 
+			this.missiles.forEach((missile, index) => {
+				if( missile.hasExploded ){
+					this.missiles.splice(index,1)
+				}
+				missile.render();
+			});
 
+
+		//this.missiles = [];
+			//console.timeEnd('Game Loop')
 
 		}, 20);
 
@@ -135,12 +160,20 @@ class Game {
 		this.canvas.addEventListener('click', (event) => {
 			const rect = canvas.getBoundingClientRect();
 			const position = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+			const tanks = this.tanks;
 			let isClicked = false;
 
-			this.tanks.forEach((t, index) => {
+			this.worldObjects.forEach((obj) => {
+				if ( checkIfClicked(position, obj) )  {
+					tanks[selectedTankIndex].targetPos =  position;
+					tanks[selectedTankIndex].isFiring = true;
+				}
+			});
+
+			tanks.forEach((t, index) => {
 
 				t.selected = false;
-				if (t.checkIfClicked(position)) {
+				if ( checkIfClicked(position, t) )  {
 					if (t.team === this.team) {
 
 						// if (index === selectedTankIndex) {
@@ -174,7 +207,9 @@ class Game {
 
 		});		
 	}
-
+	addMissile(missile){
+		this.missiles.push(missile);
+	}
 
 
 }

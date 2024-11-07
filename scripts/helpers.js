@@ -56,3 +56,24 @@ function normalizeAngleDifference(angleDifference) {
     if (angleDifference > 180) angleDifference -= 360; // Adjust to [-180, 180]
     return angleDifference;
 };
+
+function checkIfClicked(position, body) {
+    // Step 1: Translate the click position to the tank's local coordinate system
+    const dx = position.x - body.position.x;
+    const dy = position.y - body.position.y;
+
+    // Step 2: Rotate the click point in the opposite direction of the tank's rotation
+    const angleRad = -body.angle * (Math.PI / 180); // Convert angle to radians
+    const rotatedX = dx * Math.cos(angleRad) - dy * Math.sin(angleRad);
+    const rotatedY = dx * Math.sin(angleRad) + dy * Math.cos(angleRad);
+
+    // Step 3: Check if the rotated click coordinates fall within the tank's rectangular boundaries
+    const isWithinBounds = (
+        rotatedX >= -body.comp.halfW &&
+        rotatedX <= body.comp.halfW &&
+        rotatedY >= -body.comp.halfH &&
+        rotatedY <= body.comp.halfH
+    );
+    // Returns true if within bounds, false otherwise
+    return isWithinBounds;
+};

@@ -44,7 +44,7 @@
       worldBuilders: [
         {
           builderOpts: {
-            num: 40,
+            num: 14,
             dx: 40,
             dy: 9,
             sx: 0,
@@ -58,18 +58,20 @@
           }
         }
       ],
-      tankOpts: [{
-        position: { x: 325, y: 215 },
-        moveToPos: { x: 325, y: 215 },
-        wheelLineNum: 2,
-        size: 5,
-        speed: 1,
-        frame: 0,
-        cannonAngle: 0,
-        bodyFill: 'red',
-        id: 0,
-        team: 'Warriors'
-      }]
+      tankOpts: [
+        {
+          position: { x: 325, y: 175 },
+          moveToPos: { x: 325, y: 175 },
+          wheelLineNum: 2,
+          size: 5,
+          speed: 1,
+          frame: 0,
+          cannonAngle: 0,
+          bodyFill: 'red',
+          id: 0,
+          team: 'Warriors'
+        }
+      ]
 
     }
 
@@ -84,7 +86,7 @@
 
     let game = new Game(canvas, gameOptions);
     game.attachEvents();
-    
+
     game.run();
 
     /************
