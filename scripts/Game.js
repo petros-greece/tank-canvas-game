@@ -166,20 +166,8 @@ class Game {
 			const rect = canvas.getBoundingClientRect();
 			const position = { x: event.clientX - rect.left, y: event.clientY - rect.top }
 			const tanks = this.tanks;
-			let isClicked = false;
-			let isFiring = false;
+			let isEntityClicked = false;
 
-			//check if object is to get fired
-		
-			this.worldObjects.forEach((obj) => {
-				if ( checkIfClicked(position, obj) )  {	
-					isFiring = true;
-					tanks[selectedTankIndex].stop();
-					tanks[selectedTankIndex].targetPos =  position;
-					tanks[selectedTankIndex].isFiring = true;
-			
-				}
-			});
 
 			//check if another tank is firing
 			tanks.forEach((t, index) => {
@@ -187,29 +175,37 @@ class Game {
 				t.isSelected = false;
 				
 				if ( checkIfClicked(position, t) )  {
+					isEntityClicked = true;
 					if (t.team === this.team) {
 						selectedTankIndex = index;
-						isClicked = true;
 					}
 					else{
-						tanks[selectedTankIndex].targetPos = position;
+						tanks[selectedTankIndex].target = t;
 						tanks[selectedTankIndex].isFiring = true;
-						tanks[selectedTankIndex].stop();
-						isFiring = true;
-						isClicked = true;
+						tanks[selectedTankIndex].stop();								
 					
-
-
 					}
 				}
 
-			
-
-
 			});
 
+
+			//check if object is to get fired	
+			this.worldObjects.forEach((obj) => {
+				if ( checkIfClicked(position, obj) )  {
+					isEntityClicked = true;	
+					tanks[selectedTankIndex].stop();
+					tanks[selectedTankIndex].target = obj;
+					tanks[selectedTankIndex].isFiring = true;	
+				}
+			});
+
+
+
 			// Move the selected tank to the clicked point
-			if (!isClicked && !isFiring) {
+			if ( !isEntityClicked ) {
+				this.tanks[selectedTankIndex].isFiring = false;
+				tanks[selectedTankIndex].target = null;
 				this.tanks[selectedTankIndex].moveToPos = position;
 				this.tanks[selectedTankIndex].go();
 			}

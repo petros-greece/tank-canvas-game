@@ -11,7 +11,7 @@ class Tank {
         this.position.x = options.position.x || 200;  // Default x position
         this.position.y = options.position.y || 200; // Default y position
         this.moveToPos = options.moveToPos || { ...this.position };
-        this.targetPos = {};
+        this.target = {};
         // Assign other tank properties with option values or defaults
         this.bodyFill = options.bodyFill ?? "rgba(100,100,100,1)";
         this.towerFill = options.towerFill ?? "rgba(50,50,50,1)";
@@ -329,6 +329,7 @@ class Tank {
         // Add the missile to the game's missiles array
         this.game.addMissile(missile);
     }
+
     fireMissileTo(ctx) {
         const targetAngle = this.calculateTargetAngle();
         const cannonGlobalAngle = this.calculateCannonGlobalAngle();
@@ -336,9 +337,8 @@ class Tank {
 
         this.adjustCannonAngle(angleDifference);
 
-        if (this.isAlignedWithTarget(angleDifference)) {
+        if (this.isAlignedWithTarget(angleDifference) && this.game.frame%this.reloadSpeed === 0) {
             this.fireMissile(ctx);
-            this.isFiring = false;// Stop firing once aligned and missile is launched
         }
 
         this.normalizeCannonAngle();
@@ -346,8 +346,8 @@ class Tank {
 
     // Calculate the angle to the target position
     calculateTargetAngle() {
-        const dx = this.targetPos.x - this.position.x;
-        const dy = this.targetPos.y - this.position.y;
+        const dx = this.target.position.x - this.position.x;
+        const dy = this.target.position.y - this.position.y;
         return Math.atan2(dy, dx) * (180 / Math.PI); // Target angle in degrees
     }
 
@@ -415,17 +415,13 @@ class Tank {
 
         //if targets have remained
         if(closestObject){
-            if(!this.isFiring) {
-                this.isFiring  = !(this.game.frame%this.reloadSpeed);
-                this.targetPos = {...closestObject.position};
+            this.target = {...closestObject};
+            if(!this.isFiring) {   
                 if(minDistance > 200){
                     this.moveToPos = {...closestObject.position};        
                     this.moveOrRotateCannon();
-             }
-            }
-            else{
-                 this.targetPos = closestObject.position;
-            }
+                }
+            }           
         }
         this.render();
     }
