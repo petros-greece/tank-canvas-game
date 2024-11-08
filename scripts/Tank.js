@@ -28,7 +28,7 @@ class Tank {
         this.cannonAngle = options.cannonAngle ?? 0;
         this.frame = Math.floor(Math.random() * 10);
         this.isFiring = options.isFiring?? false;
-        this.weight = 1000;
+        this.weight = options.weight || 1000;
         this.reloadSpeed = 100;
 
         this.armor = 100;
@@ -37,7 +37,7 @@ class Tank {
         this.isSelected = false;
         this.isColliding = false;
         this.isStopped = false;
-
+        this.canShoot = true;
 
         // Component object for calculations or stored dimensions
         this.comp = {};
@@ -74,6 +74,22 @@ class Tank {
 
     }
 
+    renderStatic() {
+
+        const ctx = this.ctx;
+
+        this.drawStatic();
+
+        if (this.isFiring) {
+            this.fireMissileTo(ctx);
+        }
+        if (this.isExploding) {
+            this.renderExplosion();
+        }
+
+    }
+
+
     draw() {
         const size = this.size;
         const ctx = this.ctx;
@@ -88,11 +104,25 @@ class Tank {
         ctx.restore();
     }
 
+    drawStatic() {
+        const size = this.size;
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.translate(this.position.x, this.position.y);
+        ctx.rotate(this.angle * (Math.PI / 180));
+        this.drawSelection(ctx);
+        this.drawBodyStatic(ctx);
+        this.drawTower(ctx, size);
+        this.drawCannon(ctx, size);
+        ctx.restore();
+    }
+
+
     drawCannon(ctx, size) {
         ctx.save();
         ctx.rotate((this.cannonAngle) * (Math.PI / 180));
         ctx.fillStyle = this.cannonFill;
-        ctx.fillRect(2 * this.size, -0.5 * this.size, 6 * this.size, this.size);
+        ctx.fillRect(2 * size, -0.5 * size, 6 * size, size);
         ctx.restore();
     }
 
@@ -125,6 +155,15 @@ class Tank {
         ctx.fillStyle = `rgba(5,5,5,${this.comp.damage})`;
         ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width * this.comp.damage, this.comp.halfW);
 
+    }
+
+    drawBodyStatic(ctx, size) {
+        // Draw tank body
+        ctx.fillStyle = this.bodyFill;
+        ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, 2*this.comp.halfH);
+
+        ctx.fillStyle = `rgba(5,5,5,${this.comp.damage})`;
+        ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, 2*this.comp.halfH);
     }
 
     drawTower(ctx, size) {
@@ -336,9 +375,12 @@ class Tank {
         const angleDifference = this.calculateAngleDifference(targetAngle, cannonGlobalAngle);
 
         this.adjustCannonAngle(angleDifference);
-
-        if (this.isAlignedWithTarget(angleDifference) && this.game.frame%this.reloadSpeed === 0) {
+        if ( this.isAlignedWithTarget(angleDifference) && this.canShoot ) {
             this.fireMissile(ctx);
+            this.canShoot = false;
+        }
+        if(!this.canShoot){
+            this.canShoot = this.game.frame%this.reloadSpeed === 0;
         }
 
         this.normalizeCannonAngle();
@@ -416,12 +458,13 @@ class Tank {
         //if targets have remained
         if(closestObject){
             this.target = {...closestObject};
-            if(!this.isFiring) {   
-                if(minDistance > 200){
-                    this.moveToPos = {...closestObject.position};        
-                    this.moveOrRotateCannon();
-                }
-            }           
+            //this.isFiring = this.game.frame%this.reloadSpeed === 0
+         
+            if(minDistance > 200){
+                this.moveToPos = {...closestObject.position};        
+                this.moveOrRotateCannon();
+            }
+                       
         }
         this.render();
     }
