@@ -29,7 +29,7 @@ class Tank {
         this.frame = Math.floor(Math.random() * 10);
         this.isFiring = options.isFiring?? false;
         this.weight = options.weight || 1000;
-        this.reloadSpeed = 100;
+        this.reloadSpeed = options.reloadSpeed || 100;
 
         this.armor = 100;
         this.damage = 0;

@@ -9,7 +9,7 @@ class GameObject {
         this.isColliding = false;  // Track collision state
         this.comp = {}
         this.speed = 1;
-        this.weight = 1000;
+        this.weight = options.weight || 1000;
         this.angle = options.angle || 0;
         this.moveToAngle = 0,
         this.init();

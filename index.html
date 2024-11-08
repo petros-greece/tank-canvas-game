@@ -91,6 +91,7 @@ console.log(canvas.width, canvas.height);
             height: 50,
             width: 20,
             position: { x: 40, y: 20 },
+            weight: 1000
           }
         }
       ],
@@ -99,7 +100,7 @@ console.log(canvas.width, canvas.height);
           position: { x: 25, y: 75 },
           wheelLineNum: 2,
           size: 5,
-          speed: 2,
+          speed: 1,
           frame: 0,
           cannonAngle: 0,
           bodyFill: 'red',
@@ -129,12 +130,13 @@ console.log(canvas.width, canvas.height);
     wheelTracksFill: "rgba(128, 128, 128, 1)", // Same grey for the tracks
     selectionColor: "rgba(128, 128, 128, 0.3)", // Grey selection color
     size: 10,                           // Size of the tank
-    speed: 1,                           // Movement speed
+    speed: 0,                           // Movement speed
     angle: 0,                           // Starting angle
     cannonAngle: 0,                      // Starting cannon angle
     team: 'Warriors',
-          move: 'renderStatic',
-          weight: 10000000
+    move: 'renderStatic',
+    weight: 10000000,
+    reloadSpeed: 50
 
 }      
       ]
