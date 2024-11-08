@@ -58,7 +58,7 @@ class GameObject {
             y: this.position.y + moveY
         };
 
-        console.log(this.moveToPos.x, this.moveToPos.y, this.position.x, this.position.y);
+        //console.log(this.moveToPos.x, this.moveToPos.y, this.position.x, this.position.y);
 
         // Adjust the object's angle to reflect the new direction
         this.moveToAngle = combinedAngle; // Keep angle within 0-359 degrees
@@ -81,7 +81,7 @@ class GameObject {
             const stepX = (dx / distance);
             const stepY = (dy / distance);
 
-            console.log(stepX, stepY, distance);
+            //console.log(stepX, stepY, distance);
             // Update the position
             this.position.x += stepX;
             this.position.y += stepY;

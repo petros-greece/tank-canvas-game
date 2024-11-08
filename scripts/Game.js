@@ -4,6 +4,7 @@ class Game {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext("2d");
 		this.team = 'Warriors';
+		this.frame = 0;
 
 		// Initialize properties from options or set to default values
 		this.tanks = options.tanks || []; // Array to hold all tank objects
@@ -85,7 +86,7 @@ class Game {
 		
 		
 				this.missiles.forEach((missile, index) => {
-					if( missile.owner !== t.id && detectCollision(missile, t) && !missile.isExploding){
+					if( !t.isExploding  && missile.owner !== t.id && detectCollision(missile, t) && !missile.isExploding){
 						missile.isExploding = true;
 						t.addDamage(10);
 					}
@@ -150,6 +151,7 @@ class Game {
 			});
 
 
+			this.frame+=1;
 		
 			//console.timeEnd('Game Loop')
 
@@ -167,6 +169,7 @@ class Game {
 			let isClicked = false;
 			let isFiring = false;
 
+			//check if object is to get fired
 		
 			this.worldObjects.forEach((obj) => {
 				if ( checkIfClicked(position, obj) )  {	
@@ -178,28 +181,25 @@ class Game {
 				}
 			});
 
+			//check if another tank is firing
 			tanks.forEach((t, index) => {
 
-				t.selected = false;
+				t.isSelected = false;
 				
 				if ( checkIfClicked(position, t) )  {
 					if (t.team === this.team) {
-
-						// if (index === selectedTankIndex) {
-						//   tanks[selectedTankIndex].fireMissile(ctx)
-						// }
 						selectedTankIndex = index;
 						isClicked = true;
-
 					}
 					else{
-						tanks[selectedTankIndex].targetPos =  position;
+						tanks[selectedTankIndex].targetPos = position;
 						tanks[selectedTankIndex].isFiring = true;
 						tanks[selectedTankIndex].stop();
-						//tanks[selectedTankIndex].addDamage(10);
-						//tanks[selectedTankIndex].fireMissileTo(ctx);
 						isFiring = true;
 						isClicked = true;
+					
+
+
 					}
 				}
 
@@ -213,7 +213,7 @@ class Game {
 				this.tanks[selectedTankIndex].moveToPos = position;
 				this.tanks[selectedTankIndex].go();
 			}
-			this.tanks[selectedTankIndex].selected = true;
+			this.tanks[selectedTankIndex].isSelected = true;
 
 
 		});		
