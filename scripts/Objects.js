@@ -11,6 +11,8 @@ class GameObject {
         this.speed = 1;
         this.weight = options.weight || 1000;
         this.angle = options.angle || 0;
+        this.armor = 1000;
+        this.damage = 0;
         this.moveToAngle = 0,
         this.init();
     }
