@@ -8,9 +8,11 @@ const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 function resizeCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  console.log(canvas.width, canvas.height);
+  //console.log(canvas.width, canvas.height);
   // Optionally scale the drawing context to account for the higher resolution
   //ctx.scale(dpr, dpr);
+
+
 }
 
 // Call the resize function initially

@@ -183,10 +183,10 @@ export class Tank {
     drawBodyStatic(ctx: CanvasRenderingContext2D, size: number) {
         // Draw tank body
         ctx.fillStyle = this.bodyFill;
-        ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, 2*this.comp.halfH);
+        ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);
 
         ctx.fillStyle = `rgba(5,5,5,${this.comp.damage})`;
-        ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, 2*this.comp.halfH);
+        ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);
     }
 
     drawTower(ctx: CanvasRenderingContext2D, size: number) {

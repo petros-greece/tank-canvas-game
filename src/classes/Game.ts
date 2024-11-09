@@ -86,7 +86,7 @@ export class Game {
     this.worldObjects = options.worldObjects || [];
     this.tankOpts = options.tankOpts || [];
     this.interval = null;
-alert('Game')
+
     this.init(canvas);
   }
 
