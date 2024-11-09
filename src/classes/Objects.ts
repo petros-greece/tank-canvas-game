@@ -1,5 +1,5 @@
 
-  import { ObjectOptions, Position } from "../interfaces/Interfaces";
+import { ObjectOptions, Position } from "../interfaces/Interfaces";
 
 export class GameObject {
     ctx: CanvasRenderingContext2D;
@@ -18,7 +18,7 @@ export class GameObject {
     moveToAngle: number;
     id?: string;
   
-    constructor(ctx: CanvasRenderingContext2D, options: ObjectOptions = {}) {
+    constructor(ctx: CanvasRenderingContext2D, options: ObjectOptions) {
       this.ctx = ctx;
       this.position = options.position || { x: 0, y: 0 };
       this.moveToPos = options.moveToPos || { ...this.position };

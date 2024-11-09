@@ -1,4 +1,5 @@
 import { Game } from './classes/Game';
+import { GameOptions } from './interfaces/Interfaces';
 
 // Get the canvas element and its context
 const canvas = document.getElementById("tankCanvas") as HTMLCanvasElement;
@@ -19,53 +20,50 @@ function resizeCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D):
 resizeCanvas(canvas, ctx);
 
 // Game options object with world builders and tank options
-const gameOptions = {
+const gameOptions:GameOptions = {
   worldBuilders: [
     {
+      buildMethod: 'giveRowOfObjects',
       builderOpts: {
-        num: 16,
-        dx: 60,
-        dy: 43,
-        sx: 1,
+        dx: 0,
+        dy: 0,
+        sx: 0,
         sy: 0,
-        sa: 2,
+        sa: 0,
+        type: 'vertical'
       },
       objectOpts: {
         height: 50,
-        width: 20,
-        position: { x: 40, y: 20 },
+        width: 130,
+        position: { x:100, y: 0 },
         weight: 1000,
       }
     }
   ],
   tankOpts: [
     {
-      position: { x: 25, y: 75 },
-      wheelLineNum: 2,
+      position: { x: 825, y: 75 },
       size: 5,
       speed: 1,
-      frame: 0,
       cannonAngle: 0,
       bodyFill: 'red',
-      id: 0,
+      id: '0',
       team: 'Warriors',
       moveMethod: 'moveTo',
     },
     {
-      position: { x: 255, y: 365 },
-      wheelLineNum: 2,
+      position: { x: 555, y: 365 },
       size: 8,
       speed: 1,
-      frame: 0,
       cannonAngle: 0,
       bodyFill: 'red',
-      id: 1,
+      id: '1',
       team: 'Warriors',
       moveMethod: 'findClosestTank',
       isFiring: true,
     },
     {
-      position: { x: 200, y: 200 },
+      position: { x: 700, y: 200 },
       bodyFill: "rgba(128, 128, 128, 1)",
       towerFill: "black",
       cannonFill: "black",

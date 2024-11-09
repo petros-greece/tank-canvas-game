@@ -2,32 +2,10 @@ import { Tank } from "./Tank";
 import { Missile } from "./Missile";
 import { GameObject } from "./Objects";
 import { WorldBuilder } from "./WorldBuilder";
-import { TankOptions } from "../interfaces/Interfaces";
+import { TankOptions, GameOptions, ObjectOptions, BuilderOptions } from "../interfaces/Interfaces";
 import { detectCollision, checkIfClicked }  from "../helpers";
 
-interface GameOptions {
-  tanks?: Tank[];
-  missiles?: Missile[];
-  objects?: GameObject[];
-  stage?: number;
-  score?: number;
-  time?: number;
-  stats?: {
-    kills: number;
-    hits: number;
-    shotsFired: number;
-    accuracy: number;
-  };
-  settings?: {
-    difficulty: string;
-    maxMissiles: number;
-    maxTanks: number;
-    stageBackground: string;
-  };
-  worldBuilders?: any[]; // Define a more specific type if available
-  worldObjects?: GameObject[];
-  tankOpts?: any[]; // Define a more specific type if available
-}
+
 
 export class Game {
   canvas: HTMLCanvasElement;
@@ -53,7 +31,7 @@ export class Game {
     stageBackground: string;
   };
   builder: WorldBuilder;
-  worldBuilders: any[]; // Specify a more precise type if possible
+  worldBuilders:  {builderOpts:BuilderOptions, buildMethod:keyof WorldBuilder, objectOpts: ObjectOptions}[]; // Specify a more precise type if possible
   worldObjects: GameObject[];
   tankOpts: TankOptions[]; // Specify a more precise type if possible
   interval: any;
@@ -63,9 +41,9 @@ export class Game {
     this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.team = "Warriors";
     this.frame = 0;
-    this.tanks = options.tanks || [];
-    this.missiles = options.missiles || [];
-    this.objects = options.objects || [];
+    this.tanks = [];
+    this.missiles = [];
+    this.objects = [];
     this.stage = options.stage || 1;
     this.score = options.score || 0;
     this.time = options.time || 0;
@@ -83,7 +61,7 @@ export class Game {
     };
     this.builder = new WorldBuilder(canvas);
     this.worldBuilders = options.worldBuilders || [];
-    this.worldObjects = options.worldObjects || [];
+    this.worldObjects = [];
     this.tankOpts = options.tankOpts || [];
     this.interval = null;
 
@@ -94,7 +72,7 @@ export class Game {
     const ctx = this.ctx;
 
     this.worldBuilders.forEach((builder) => {
-      const objs = this.builder.giveTeamOfObjects(builder.builderOpts, builder.objectOpts);
+      const objs = this.builder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
       objs.forEach((opts) => {
         const gameObject = new GameObject(ctx, opts);
         this.worldObjects.push(gameObject);

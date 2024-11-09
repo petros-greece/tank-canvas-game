@@ -1,4 +1,5 @@
 import { Missile } from "./../classes/Missile";
+import { WorldBuilder } from "../classes/WorldBuilder";
 
 export interface Position {
     x: number;
@@ -11,6 +12,53 @@ export interface MissileOptions {
     width?: number;
     height?: number;
     owner?: string;
+}
+
+export interface Tank {
+    ctx: CanvasRenderingContext2D;
+    team: string;
+    id: string;
+    game: Game;
+
+    position: Position;
+    moveToPos: Position;
+    target: any;  // Replace with a more specific type if available
+    bodyFill: string;
+    towerFill: string;
+    cannonFill: string;
+    wheelTracksStroke: string;
+    wheelTracksFill: string;
+    wheelTracksLineNum: number;
+    selectionColor: string;
+
+    size: number;
+    width: number;
+    height: number;
+    speed: number;
+    angle: number;
+    cannonAngle: number;
+    frame: number;
+    isFiring: boolean;
+    weight: number;
+    reloadSpeed: number;
+
+    armor: number;
+    damage: number;
+    isSelected: boolean;
+    isColliding: boolean;
+    isStopped: boolean;
+    canShoot: boolean;
+
+    comp: { [key: string]: any };  // Replace `any` with specific types if known
+
+    isExploding?: boolean;
+    explosionRadius: number;
+    explosionMaxRadius?: number;
+    explosionFadeOutRadius: number;
+    isDestroyed?: boolean;
+    moveMethod?: string;
+
+    move: () => void;  // Define parameters if move takes any
 }
 
 export interface TankOptions {
@@ -66,7 +114,7 @@ export interface GameObject {
 }
 
 export interface GameOptions {
-    tanks?: TankOptions[];
+    tanks?: Tank[];
     missiles?: Missile[];
     objects?: GameObject[];
     stage?: number;
@@ -84,9 +132,9 @@ export interface GameOptions {
         maxTanks: number;
         stageBackground: string;
     };
-    worldBuilders?: any[]; // Define a more specific type if available
+    worldBuilders?: {builderOpts:BuilderOptions, buildMethod:keyof WorldBuilder, objectOpts: ObjectOptions}[]; // Define a more specific type if available
     worldObjects?: GameObject[];
-    tankOpts?: any[]; // Define a more specific type if available
+    tankOpts?: TankOptions[]; // Define a more specific type if available
 }
 
 export interface MissileOptions {
@@ -101,19 +149,20 @@ export interface ObjectOptions {
     id?: string;
     position?: Position;
     moveToPos?: Position;
-    width?: number;
-    height?: number;
+    width: number;
+    height: number;
     color?: string;
     weight?: number;
     angle?: number;
 }
 
 export interface BuilderOptions {
-    num: number;
+    num?: number;
     dx: number;
     dy: number;
     sx: number;
     sy: number;
     sa: number;
+    type?: string;
 }
 
