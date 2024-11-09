@@ -46,25 +46,27 @@
 </head>
 
 <body style="background: green">
-  <canvas id="tankCanvas" width="700" height="700"></canvas>
+  <canvas id="tankCanvas" width="700" height="500"></canvas>
 
-  <script src="scripts/helpers.js"></script>
 
-  <script src="scripts/WorldBuilder.js"></script>
-  <script src="scripts/Missile.js"></script>
-  <script src="scripts/Tank.js"></script>
-  <script src="scripts/Objects.js"></script>
-  <script src="scripts/Game.js"></script>
+  <script src="./dist/bundle.js"></script>
+
+
+
+
+
 
   <script>
-    // Λήψη του canvas και του context
+
+
+function test(){
     const canvas = document.getElementById("tankCanvas");
     const ctx = canvas.getContext("2d");
 
     function resizeCanvas(canvas, ctx) {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-console.log(canvas.width, canvas.height);
+      console.log(canvas.width, canvas.height);
             // Scale the drawing context to account for the higher resolution
            // ctx.scale(dpr, dpr);
 
@@ -80,12 +82,12 @@ console.log(canvas.width, canvas.height);
       worldBuilders: [
         {
           builderOpts: {
-            num: 34,
+            num: 16,
             dx: 60,
-            dy: 23,
-            sx: 0,
+            dy: 43,
+            sx: 1,
             sy: 0,
-            sa: 0,
+            sa: 2,
           },
           objectOpts: {
             height: 50,
@@ -117,7 +119,7 @@ console.log(canvas.width, canvas.height);
           cannonAngle: 0,
           bodyFill: 'red',
           id: 1,
-          team: 'Bad Warriors',
+          team: 'Warriors',
           move: 'findClosestTank',
           isFiring: true
         }, 
@@ -135,7 +137,7 @@ console.log(canvas.width, canvas.height);
     cannonAngle: 0,                      // Starting cannon angle
     team: 'Warriors',
     move: 'renderStatic',
-    weight: 10000000,
+    weight: 100000000,
     reloadSpeed: 50
 
 }      
@@ -143,19 +145,13 @@ console.log(canvas.width, canvas.height);
 
     }
 
-
-
-
-
-
-
-
-
-
     let game = new Game(canvas, gameOptions);
     game.attachEvents();
 
     game.run();
+
+  }
+
 
     /************
         
@@ -324,6 +320,8 @@ console.log(canvas.width, canvas.height);
     ***************/
 
   </script>
+
+
 </body>
 
 </html>
