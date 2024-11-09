@@ -90,7 +90,7 @@ export class Tank {
         this.comp = {};
    
         
-        this.move = () => options.moveMethod ? (this as any)[options.moveMethod] : this.moveTo()
+        this.move = () => options.moveMethod ? (this as any)[options.moveMethod]() : this.moveTo()
         this.init();
     }
 
@@ -112,6 +112,7 @@ export class Tank {
     }
 
     renderStatic(): void {
+        console.log('static');
         const ctx = this.ctx;
         this.drawStatic();
         if (this.isFiring) this.fireMissileTo(ctx);

@@ -49,7 +49,7 @@ const gameOptions = {
       bodyFill: 'red',
       id: 0,
       team: 'Warriors',
-      move: 'moveTo',
+      moveMethod: 'moveTo',
     },
     {
       position: { x: 255, y: 365 },
@@ -61,7 +61,7 @@ const gameOptions = {
       bodyFill: 'red',
       id: 1,
       team: 'Warriors',
-      move: 'findClosestTank',
+      moveMethod: 'findClosestTank',
       isFiring: true,
     },
     {
@@ -77,7 +77,7 @@ const gameOptions = {
       angle: 0,
       cannonAngle: 0,
       team: 'Warriors',
-      move: 'renderStatic',
+      moveMethod: 'renderStatic',
       weight: 100000000,
       reloadSpeed: 50,
     }
