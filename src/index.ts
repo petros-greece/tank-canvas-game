@@ -32,6 +32,7 @@ const gameOptions:GameOptions = {
         width: 30,
         position: { x:250, y: 0 },
         weight: 1000,
+        isBreakable: true
       }
     }
   ],
@@ -57,7 +58,7 @@ const gameOptions:GameOptions = {
       size: 5,
       speed: 1,
       cannonAngle: 0,
-      bodyFill: 'red',
+      bodyFill: 'green',
       id: '0',
       team: 'Warriors',
       moveMethod: 'moveTo',
@@ -73,6 +74,7 @@ const gameOptions:GameOptions = {
       team: 'Warriors',
       moveMethod: 'moveTo',
       isFiring: false,
+      reloadSpeed: 20,
     },
     {
       position: { x: 700, y: 200 },

@@ -14,17 +14,22 @@ export class GameObject {
     weight: number;
     angle: number;
     armor: number;
-    damage: number;
     moveToAngle: number;
     id?: string;
+    isBreakable: boolean;
+    damage: number;
+    render: Function;
   
     constructor(ctx: CanvasRenderingContext2D, options: ObjectOptions) {
       this.ctx = ctx;
-      this.position = options.position || { x: 0, y: 0 };
-      this.moveToPos = options.moveToPos || { ...this.position };
       this.width = options.width || 30;
       this.height = options.height || 30;
+      this.position = options.position || { x: 0, y: 0 };
+      this.moveToPos = options.moveToPos || { ...this.position };
       this.color = options.color || "#4CAF50";
+      this.isBreakable = options.isBreakable || false;
+      this.id = options.id || `Object_${new Date().getTime()}`;
+
       this.isColliding = false;
       this.comp = {};
       this.speed = 1;
@@ -33,19 +38,33 @@ export class GameObject {
       this.armor = 1000;
       this.damage = 0;
       this.moveToAngle = 0;
+      this.render = this.isBreakable ? () => this.renderBreakable() : () => this.renderBody();
       this.init();
     }
   
     init(): void {
       this.comp.halfW = this.width / 2;
       this.comp.halfH = this.height / 2;
+      this.comp.damage = 0;
       this.position = this.position ? this.position : { x: this.comp.halfW, y: this.comp.halfH };
     }
   
-    render(): void {
+    renderBody(): void {
       if (this.isColliding) {
         this.moveTo();
       }
+      this.drawBody();
+    }
+
+    renderBreakable(): void {
+      if (this.isColliding) {
+        this.moveTo();
+      }   
+      this.drawBreakableBody();
+    }
+
+
+    private drawBody(){
       this.ctx.save();
       this.ctx.translate(this.position.x, this.position.y);
       this.ctx.rotate((this.angle * Math.PI) / 180);
@@ -53,6 +72,21 @@ export class GameObject {
       this.ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);
       this.ctx.restore();
     }
+
+    private drawBreakableBody(){
+      this.ctx.save();
+      this.ctx.translate(this.position.x, this.position.y);
+      this.ctx.rotate((this.angle * Math.PI) / 180);
+
+      this.ctx.fillStyle = this.isColliding ? "#FF0000" : this.color;
+      this.ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);
+
+      this.ctx.fillStyle = `rgba(5,5,5,${this.comp.damage})`;
+      this.ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);
+
+      this.ctx.restore();     
+    }
+
   
     getHit(thing: any): void {
       this.isColliding = true;
@@ -61,12 +95,17 @@ export class GameObject {
       const combinedAngleRadians = (combinedAngle * Math.PI) / 180;
       const moveX = Math.cos(combinedAngleRadians) * impactForce * 10;
       const moveY = Math.sin(combinedAngleRadians) * impactForce * 10;
-  
+      this.addDamage(100);
       this.moveToPos = {
         x: this.position.x + moveX,
         y: this.position.y + moveY,
       };
       this.moveToAngle = combinedAngle;
+    }
+
+    addDamage(damage: number){
+      this.damage += damage;
+      this.comp.damage =this.damage / this.armor;
     }
   
     moveTo(): void {
@@ -110,6 +149,7 @@ export class GameObject {
       obj.position.x -= Math.cos(collisionAngle) * (this.weight / 1000);
       obj.position.y -= Math.sin(collisionAngle) * (this.weight / 1000);
     }
+
   }
 
   

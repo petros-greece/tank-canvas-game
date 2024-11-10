@@ -110,15 +110,29 @@ export interface GameObject {
     height: number;
     color: string;
     isColliding: boolean;
-    comp: any;   // You may want to replace 'any' with a more specific type if possible
+    comp: any;   
     speed: number;
     weight: number;
     angle: number;
     armor: number;
     damage: number;
     moveToAngle: number;
-    id?: string;  // Optional property
+    id?: string;  
+    isBreakable: boolean;
 }
+
+export interface ObjectOptions {
+    width: number;
+    height: number;
+    id?: string;
+    position?: Position;
+    moveToPos?: Position;
+    color?: string;
+    weight?: number;
+    angle?: number;
+    isBreakable?: boolean;
+}
+
 
 export interface GameOptions {
     tanks?: Tank[];
@@ -152,17 +166,6 @@ export interface MissileOptions {
     width?: number;
     height?: number;
     owner?: string;
-}
-
-export interface ObjectOptions {
-    id?: string;
-    position?: Position;
-    moveToPos?: Position;
-    width: number;
-    height: number;
-    color?: string;
-    weight?: number;
-    angle?: number;
 }
 
 export interface BuilderOptions {
