@@ -48,10 +48,10 @@ export class Tank {
 
     public move: Function;
 
-    constructor(ctx: CanvasRenderingContext2D, options: TankOptions = {}, game: Game) {
+    constructor(ctx: CanvasRenderingContext2D, options: TankOptions, game: Game) {
         this.ctx = ctx;
         this.team = options.team || '';
-        this.id = options.id ? `tank_${options.id}` : 'tank_0';
+        this.id = `tank_${new Date().getTime()}`;
         this.game = game;
 
         this.position = options.position || { x: 200, y: 200 };
@@ -74,22 +74,22 @@ export class Tank {
         this.speed = options.speed ?? 1;
         this.angle = options.angle ?? 0;
         this.cannonAngle = options.cannonAngle ?? 0;
-        this.frame = Math.floor(Math.random() * 10);
         this.isFiring = options.isFiring ?? false;
         this.weight = options.weight || 1000;
-        this.reloadSpeed = options.reloadSpeed || 100;
+        this.reloadSpeed = options.reloadSpeed ? options.reloadSpeed + Math.floor(Math.random()*100) : 1000;
+        this.frame = Math.floor(Math.random() * 2000);
 
-        this.armor = 100;
+
+        this.armor = options.armor ?? 100;
         this.damage = 0;
 
-        this.isSelected = false;
+        this.isSelected = options.isSelected ?? false;
         this.isColliding = false;
         this.isStopped = false;
         this.canShoot = true;
 
         this.comp = {};
-   
-        
+     
         this.move = () => options.moveMethod ? (this as any)[options.moveMethod]() : this.moveTo()
         this.init();
     }
@@ -112,11 +112,17 @@ export class Tank {
     }
 
     renderStatic(): void {
-        console.log('static');
         const ctx = this.ctx;
         this.drawStatic();
+        //console.log(this.isFiring);
         if (this.isFiring) this.fireMissileTo(ctx);
         if (this.isExploding) this.renderExplosion();
+        const closestObject = this.getClosestEnemyTank();
+        if (closestObject && this.isFiring) {
+            this.updateTarget(closestObject);
+            //this.handleMovementTowardsTarget(closestObject);
+        }
+        this.frame += 1;
     }
 
     draw(): void {
@@ -171,7 +177,7 @@ export class Tank {
         ctx.stroke();
     }
 
-    drawBody(ctx: CanvasRenderingContext2D, size: number) {
+    private drawBody(ctx: CanvasRenderingContext2D, size: number) {
         // Draw tank body
         ctx.fillStyle = this.bodyFill;
         ctx.fillRect(-this.comp.halfW, -3.5 * size, this.width, this.comp.halfW);
@@ -181,16 +187,17 @@ export class Tank {
 
     }
 
-    drawBodyStatic(ctx: CanvasRenderingContext2D, size: number) {
+    private drawBodyStatic(ctx: CanvasRenderingContext2D, size: number) {
+        //console.log('static');
         // Draw tank body
         ctx.fillStyle = this.bodyFill;
         ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);
 
         ctx.fillStyle = `rgba(5,5,5,${this.comp.damage})`;
-        ctx.fillRect(-this.comp.halfW, -this.comp.halfH, this.width, this.height);
+        ctx.fillRect(-this.comp.halfW, -5.5*this.size, this.width, this.height);
     }
 
-    drawTower(ctx: CanvasRenderingContext2D, size: number) {
+    private drawTower(ctx: CanvasRenderingContext2D, size: number) {
         // Draw tank tower
         ctx.fillStyle = this.towerFill;
         ctx.beginPath();
@@ -198,7 +205,7 @@ export class Tank {
         ctx.fill();
     }
 
-    drawSelection(ctx: CanvasRenderingContext2D) {
+    private drawSelection(ctx: CanvasRenderingContext2D) {
         if (this.isSelected) {
             ctx.fillStyle = this.selectionColor;
             ctx.beginPath();
@@ -214,12 +221,11 @@ export class Tank {
             this.render();
             return;
         }
-   
         this.moveOrRotateCannon();
         this.render();   
     }
 
-    moveOrRotateCannon() {
+    private moveOrRotateCannon() {
         const { dx, dy, distance, targetAngle } = this.calculateTargetPosition();
 
         const { moveBackward, angleDifference } = this.calculateMovementDirection(targetAngle);
@@ -232,7 +238,7 @@ export class Tank {
     }
 
     // Calculate the target position's dx, dy, distance, and angle
-    calculateTargetPosition() {
+    private calculateTargetPosition() {
         const dx = this.moveToPos.x - this.position.x;
         const dy = this.moveToPos.y - this.position.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -242,7 +248,7 @@ export class Tank {
     }
 
     // Determine if the object should move forward or backward to minimize rotation
-    calculateMovementDirection(targetAngle:number) {
+    private calculateMovementDirection(targetAngle:number) {
         this.angle = (this.angle + 360) % 360;  // Normalize current angle
 
         let forwardAngleDiff = (targetAngle - this.angle + 360) % 360;
@@ -258,13 +264,13 @@ export class Tank {
     }
 
     // Check if rotation is needed to align with target
-    needsRotation(angleDifference:number) {
+    private needsRotation(angleDifference:number) {
         const angleTolerance = 1;  // Tolerance for alignment
         return Math.abs(angleDifference) > angleTolerance;
     }
 
     // Rotate gradually towards the target angle
-    rotateTowardsTarget(angleDifference:number) {
+    private rotateTowardsTarget(angleDifference:number) {
         const rotationSpeed = 1; // Rotation speed per frame
         if (angleDifference > 0) {
             this.angle += Math.min(rotationSpeed, angleDifference); // Rotate clockwise
@@ -276,7 +282,7 @@ export class Tank {
     }
 
     // Move towards the target position in the determined direction
-    moveInDirection(distance:number, moveBackward:boolean) {
+    private moveInDirection(distance:number, moveBackward:boolean) {
         const moveSpeed = Math.min(this.speed, distance);
         const direction = moveBackward ? -1 : 1;
         this.position.x += Math.cos(this.angle * (Math.PI / 180)) * moveSpeed * direction;
@@ -296,9 +302,21 @@ export class Tank {
     }
 
     collide(obj:any) {
+
         const dx = this.position.x - obj.position.x;
         const dy = this.position.y - obj.position.y;
         const collisionAngle = Math.atan2(dy, dx);
+        //console.log(obj)
+        if(obj.weight > 10000){
+           this.position.x += Math.cos(collisionAngle) * 3;
+           this.position.y += Math.sin(collisionAngle) * 3;
+           return;
+        }
+        if(this.weight > 10000){
+            obj.position.x -= Math.cos(collisionAngle) * 3;
+            obj.position.y -= Math.sin(collisionAngle) * 3;
+            return;
+         }
 
         this.position.x += Math.cos(collisionAngle) * obj.weight / 1000;
         this.position.y += Math.sin(collisionAngle) * obj.weight / 1000;
@@ -382,7 +400,7 @@ export class Tank {
             angle: cannonGlobalAngle,  // Set missile angle to match the cannon's angle
             width: this.size,
             height: this.size * 4,
-            owner: this.id
+            owner: this.team
         });
 
         // Add the missile to the game's missiles array
@@ -400,21 +418,22 @@ export class Tank {
             this.canShoot = false;
         }
         if(!this.canShoot){
-            this.canShoot = this.game.frame%this.reloadSpeed === 0;
+
+            this.canShoot = Math.min(this.game.frame%this.reloadSpeed) === 0;
         }
 
         this.normalizeCannonAngle();
     }
 
     // Calculate the angle to the target position
-    calculateTargetAngle() {
+    private calculateTargetAngle() {
         const dx = this.target.position.x - this.position.x;
         const dy = this.target.position.y - this.position.y;
         return Math.atan2(dy, dx) * (180 / Math.PI); // Target angle in degrees
     }
 
     // Calculate the cannon’s global angle by combining tank angle and cannon angle
-    calculateCannonGlobalAngle() {
+    private calculateCannonGlobalAngle() {
         let cannonGlobalAngle = (this.angle + this.cannonAngle) % 360;
         if (cannonGlobalAngle > 180) cannonGlobalAngle -= 360;
         if (cannonGlobalAngle < -180) cannonGlobalAngle += 360;
@@ -422,7 +441,7 @@ export class Tank {
     }
 
     // Calculate the shortest angle difference between target and cannon angles
-    calculateAngleDifference(targetAngle:number, cannonGlobalAngle:number) {
+    private calculateAngleDifference(targetAngle:number, cannonGlobalAngle:number) {
         let normalizedTargetAngle = ((targetAngle % 360) + 360) % 360;
         if (normalizedTargetAngle > 180) normalizedTargetAngle -= 360;
 
@@ -435,7 +454,7 @@ export class Tank {
     }
 
     // Adjust the cannon angle incrementally toward the target angle
-    adjustCannonAngle(angleDifference:number) {
+    private adjustCannonAngle(angleDifference:number) {
         const rotationStep = 1;
         if (Math.abs(angleDifference) > rotationStep) {
             this.cannonAngle += angleDifference > 0 ? rotationStep : -rotationStep;
@@ -445,13 +464,13 @@ export class Tank {
     }
 
     // Check if the cannon is aligned with the target angle
-    isAlignedWithTarget(angleDifference:number) {
+    private isAlignedWithTarget(angleDifference:number) {
         const rotationStep = 1;
         return Math.abs(angleDifference) <= rotationStep;
     }
 
     // Normalize the cannon angle to keep it within [-180, 180) for consistency
-    normalizeCannonAngle() {
+    private normalizeCannonAngle() {
         this.cannonAngle = ((this.cannonAngle % 360) + 360) % 360;
         if (this.cannonAngle > 180) this.cannonAngle -= 360;
     }
@@ -459,35 +478,58 @@ export class Tank {
     /** AUTOMATION *********************************************/
 
     findClosestTank() {
-        let closestObject:any = null;
+        const closestObject = this.getClosestEnemyTank();
+        if (closestObject) {
+            this.updateTarget(closestObject);
+            this.handleMovementTowardsTarget(closestObject);
+        }
+        this.render();
+    }
+    
+    // Finds and returns the closest enemy tank
+    private getClosestEnemyTank(): any | null {
+        let closestObject: any = null;
         let minDistance = Infinity;
-
+    
         this.game.tanks.forEach(tank => {
-            if (tank.id !== this.id) {
-                const dx = tank.position.x - this.position.x;
-                const dy = tank.position.y - this.position.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);  // Euclidean distance
-
+            if (this.isEnemyTank(tank)) {
+                const distance = this.calculateDistance(tank.position);
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestObject = tank;
                 }
             }
         });
-
-        //if targets have remained
-        if(closestObject){
-            this.target = {...closestObject};
-            //this.isFiring = this.game.frame%this.reloadSpeed === 0
-         
-            if(minDistance > 200){
-                this.moveToPos = {...closestObject.position};        
-                this.moveOrRotateCannon();
-            }
-                       
-        }
-        this.render();
+        
+        return closestObject;
     }
+    
+    // Checks if a tank belongs to the opposing team
+    private isEnemyTank(tank: any): boolean {
+        return tank.team !== this.team;
+    }
+    
+    // Calculates the Euclidean distance between the current position and a target position
+    private calculateDistance(targetPosition: { x: number; y: number }): number {
+        const dx = targetPosition.x - this.position.x;
+        const dy = targetPosition.y - this.position.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    // Updates the current target with the closest object found
+    private updateTarget(closestObject: any) {
+        this.target = { ...closestObject };
+    }
+    
+    // Handles movement and cannon rotation if the closest object is beyond a certain distance
+    private handleMovementTowardsTarget(closestObject: any) {
+        const distance = this.calculateDistance(closestObject.position);
+        if (distance > 300) {
+            this.moveToPos = { ...closestObject.position };
+            this.moveOrRotateCannon();
+        }
+    }
+    
 
     checkIfObstaclesInTheWay() {
 

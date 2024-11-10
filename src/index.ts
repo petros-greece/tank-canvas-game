@@ -23,23 +23,34 @@ resizeCanvas(canvas, ctx);
 const gameOptions:GameOptions = {
   worldBuilders: [
     {
-      buildMethod: 'giveRowOfObjects',
+      buildMethod: 'giveSequenceOfObjects',
       builderOpts: {
-        dx: 0,
-        dy: 0,
-        sx: 0,
-        sy: 0,
-        sa: 0,
         type: 'vertical'
       },
       objectOpts: {
         height: 50,
-        width: 130,
-        position: { x:100, y: 0 },
+        width: 30,
+        position: { x:250, y: 0 },
         weight: 1000,
       }
     }
   ],
+  tankBuilders: [
+    {
+      buildMethod: 'giveTeamOfTanks',
+      builderOpts: { dir: 'right', num: 10, dy: 55, dx: 300, },
+      objectOpts: {
+        size: 5,
+        position: { x:250, y: 0 },
+        weight: 1000,
+        moveMethod: 'findClosestTank',
+        isFiring: true,
+        reloadSpeed: 70,
+        team: 'bad guys'
+      }
+    }
+  ],
+
   tankOpts: [
     {
       position: { x: 825, y: 75 },
@@ -53,14 +64,15 @@ const gameOptions:GameOptions = {
     },
     {
       position: { x: 555, y: 365 },
+     // moveToPos: { x: 855, y: 65 },
       size: 8,
       speed: 1,
       cannonAngle: 0,
       bodyFill: 'red',
-      id: '1',
+      id: 'test_1',
       team: 'Warriors',
-      moveMethod: 'findClosestTank',
-      isFiring: true,
+      moveMethod: 'moveTo',
+      isFiring: false,
     },
     {
       position: { x: 700, y: 200 },
@@ -71,16 +83,24 @@ const gameOptions:GameOptions = {
       wheelTracksFill: "rgba(128, 128, 128, 1)",
       selectionColor: "rgba(128, 128, 128, 0.3)",
       size: 10,
-      speed: 0,
-      angle: 0,
+      speed: 90,
+      angle: 90,
       cannonAngle: 0,
       team: 'Warriors',
+      armor: 1000,
       moveMethod: 'renderStatic',
-      weight: 100000000,
-      reloadSpeed: 50,
+      weight: 10000000,
+      reloadSpeed: 20,
+      isFiring: false,
+ 
     }
   ]
 };
+
+
+
+
+
 
 // Initialize the game with the canvas and options
 let game = new Game(canvas, gameOptions);

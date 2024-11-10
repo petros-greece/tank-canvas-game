@@ -1,5 +1,12 @@
 import { Missile } from "./../classes/Missile";
 import { WorldBuilder } from "../classes/WorldBuilder";
+import { TankBuilder } from "../classes/TankBuilder";
+
+export type PublicMethodNames<T> = {
+    [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+  }[keyof T];
+
+export type Direction = "up" | "down" | "left" | "right";
 
 export interface Position {
     x: number;
@@ -73,7 +80,7 @@ export interface TankOptions {
     wheelTracksFill?: string;
     wheelTracksLineNum?: number;
     selectionColor?: string;
-    size?: number;
+    size: number;
     speed?: number;
     angle?: number;
     cannonAngle?: number;
@@ -83,10 +90,10 @@ export interface TankOptions {
     move?: string;
     explosionRadius?: number;
     explosionFadeOutRadius?: number;
-    width?: number;
-    height?: number;
     target?: any;
     moveMethod?: string;
+    armor?: number;
+    isSelected?:boolean;
 }
 
 export interface Game {
@@ -132,7 +139,9 @@ export interface GameOptions {
         maxTanks: number;
         stageBackground: string;
     };
-    worldBuilders?: {builderOpts:BuilderOptions, buildMethod:keyof WorldBuilder, objectOpts: ObjectOptions}[]; // Define a more specific type if available
+    worldBuilders?: {builderOpts:BuilderOptions, buildMethod: PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions}[]; // Define a more specific type if available
+    tankBuilders?:  {builderOpts:BuilderOptions, buildMethod: PublicMethodNames<TankBuilder>, objectOpts: TankOptions}[]; // Specify a more precise type if possible
+
     worldObjects?: GameObject[];
     tankOpts?: TankOptions[]; // Define a more specific type if available
 }
@@ -158,11 +167,12 @@ export interface ObjectOptions {
 
 export interface BuilderOptions {
     num?: number;
-    dx: number;
-    dy: number;
-    sx: number;
-    sy: number;
-    sa: number;
+    dx?: number;
+    dy?: number;
+    sx?: number;
+    sy?: number;
+    sa?: number;
     type?: string;
+    dir?: Direction;
 }
 
