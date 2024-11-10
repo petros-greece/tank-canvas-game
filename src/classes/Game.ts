@@ -136,7 +136,14 @@ export class Game {
         tank.move();
       });
 
-      this.worldObjects.forEach((obj) => {
+
+
+      this.worldObjects.forEach((obj, index) => {
+
+        if (obj.isDestroyed) {
+          this.worldObjects.splice(index, 1);
+        }
+
         this.tanks.forEach((tank) => {
           if (detectCollision(tank, obj)) {
             tank.collide(obj);
@@ -158,6 +165,8 @@ export class Game {
 
         obj.render();
       });
+
+
 
       this.missiles.forEach((missile, index) => {
         if (missile.hasExploded) {

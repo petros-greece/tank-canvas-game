@@ -19,6 +19,7 @@ export class GameObject {
     isBreakable: boolean;
     damage: number;
     render: Function;
+    isDestroyed: boolean;
   
     constructor(ctx: CanvasRenderingContext2D, options: ObjectOptions) {
       this.ctx = ctx;
@@ -31,6 +32,7 @@ export class GameObject {
       this.id = options.id || `Object_${new Date().getTime()}`;
 
       this.isColliding = false;
+      this.isDestroyed = false;
       this.comp = {};
       this.speed = 1;
       this.weight = options.weight || 1000;
@@ -106,6 +108,7 @@ export class GameObject {
     addDamage(damage: number){
       this.damage += damage;
       this.comp.damage =this.damage / this.armor;
+      this.isDestroyed = this.comp.damage >= 1;
     }
   
     moveTo(): void {
