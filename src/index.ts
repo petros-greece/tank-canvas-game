@@ -39,7 +39,7 @@ const gameOptions:GameOptions = {
   tankBuilders: [
     {
       buildMethod: 'giveTeamOfTanks',
-      builderOpts: { dir: 'right', num: 10, dy: 55, dx: 300, },
+      builderOpts: { dir: 'right', num: 3, dy: 55, dx: 300, },
       objectOpts: {
         size: 5,
         position: { x:250, y: 0 },
@@ -53,18 +53,18 @@ const gameOptions:GameOptions = {
   ],
 
   tankOpts: [
+    // {
+    //   position: { x: 825, y: 75 },
+    //   size: 5,
+    //   speed: 1,
+    //   cannonAngle: 0,
+    //   bodyFill: 'green',
+    //   id: '0',
+    //   team: 'Warriors',
+    //   moveMethod: 'moveTo',
+    // },
     {
-      position: { x: 825, y: 75 },
-      size: 5,
-      speed: 1,
-      cannonAngle: 0,
-      bodyFill: 'green',
-      id: '0',
-      team: 'Warriors',
-      moveMethod: 'moveTo',
-    },
-    {
-      position: { x: 555, y: 365 },
+      position: { x: 200, y: 365 },
      // moveToPos: { x: 855, y: 65 },
       size: 8,
       speed: 1,
@@ -75,9 +75,10 @@ const gameOptions:GameOptions = {
       moveMethod: 'moveTo',
       isFiring: false,
       reloadSpeed: 20,
+      armor: 10000,
     },
     {
-      position: { x: 700, y: 200 },
+      position: { x: 200, y: 200 },
       bodyFill: "rgba(128, 128, 128, 1)",
       towerFill: "black",
       cannonFill: "black",
@@ -89,7 +90,7 @@ const gameOptions:GameOptions = {
       angle: 90,
       cannonAngle: 0,
       team: 'Warriors',
-      armor: 1000,
+      armor: 100,
       moveMethod: 'renderStatic',
       weight: 10000000,
       reloadSpeed: 20,

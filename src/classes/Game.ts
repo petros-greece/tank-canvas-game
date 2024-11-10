@@ -151,7 +151,7 @@ export class Game {
         });
 
         this.missiles.forEach((missile) => {
-          if (missile.owner !== obj.id && detectCollision(missile, obj) && !missile.isExploding) {
+          if (missile.owner !== obj.team && detectCollision(missile, obj) && !missile.isExploding) {
             missile.isExploding = true;
             obj.getHit(missile);
           }
@@ -217,7 +217,7 @@ export class Game {
       });
 
       if (!isEntityClicked && this.selectedTank ) {
-        console.log('selected start moving');
+        console.log('selected start moving', this.selectedTank );
 
         this.selectedTank.isFiring = false;
         this.selectedTank.target = null;
@@ -226,7 +226,7 @@ export class Game {
       }
 
       if (this.selectedTank) {
-        console.log('clicked on selected selected!!!');
+        console.log('clicked on selected selected!!!', this.selectedTank);
 
         this.selectedTank.isSelected = true;
       }

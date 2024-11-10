@@ -8,6 +8,7 @@ export class GameObject {
     width: number;
     height: number;
     color: string;
+    team: string;
     isColliding: boolean;
     comp: any;
     speed: number;
@@ -30,6 +31,7 @@ export class GameObject {
       this.color = options.color || "#4CAF50";
       this.isBreakable = options.isBreakable || false;
       this.id = options.id || `Object_${new Date().getTime()}`;
+      this.team = options.team || "Warriors";
 
       this.isColliding = false;
       this.isDestroyed = false;

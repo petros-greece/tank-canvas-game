@@ -131,6 +131,7 @@ export interface ObjectOptions {
     weight?: number;
     angle?: number;
     isBreakable?: boolean;
+    team?: string;
 }
 
 
