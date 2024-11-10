@@ -1,3 +1,15 @@
+# to do
+
+1. make objects optionally breakable;
+2. Add more game logic
+3. Make calculations for the games realiability
+4. Add a timer
+5. Add a scoreboard
+6. Add a leaderboard
+7. Add a pause menu
+8. Add a high score board
+
+
 # tank-canvas-game
 
 Hello everyone! My name is Petros, and I'm thrilled to share my journey in creating a JavaScript and HTML5 tank game using the Canvas API.
