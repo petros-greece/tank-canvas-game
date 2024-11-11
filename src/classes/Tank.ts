@@ -36,7 +36,7 @@ export class Tank {
 	private isStopped: boolean;
 	private canShoot: boolean;
 
-	private comp: { [key: string]: any } = {};
+	public comp: { [key: string]: any } = {};
 
 
 	public isExploding?: boolean;
@@ -56,7 +56,7 @@ export class Tank {
 
 		this.position = options.position || { x: 200, y: 200 };
 		this.moveToPos = options.moveToPos || { ...this.position };
-		this.target = { position: { x: 0, y: 0 } };
+		this.target = null;
 
 		this.bodyFill = options.bodyFill ?? "rgba(100,100,100,1)";
 		this.towerFill = options.towerFill ?? "rgba(50,50,50,1)";
@@ -91,8 +91,8 @@ export class Tank {
 
 		this.comp = {};
 
-		this.move = () => options.moveMethod ? (this as any)[options.moveMethod]() : this.moveTo()
 		this.init();
+		this.move = () => options.moveMethod ? (this as any)[options.moveMethod]() : this.moveTo()
 	}
 
 	init(): void {
@@ -109,20 +109,25 @@ export class Tank {
 		const ctx = this.ctx;
 		this.draw();
 		if (this.isFiring) {
-			if( this.id === 'test_1'){
-				//console.log('target', this.target)
-			}
-			if (this.target.comp.damage >= 1 && this.id === 'test_1') {
-				console.log('Target Destroyed!!')
+			if (this.target && this.target.comp.damage >= 1) {
+
+				//console.log('Target Destroyed!!', this.target.comp.damage)
 				const closestObject = this.getClosestEnemyTank();
 				if (closestObject) {
 					this.updateTarget(closestObject);
 					this.handleMovementTowardsTarget(closestObject);
-					this.fireMissileTo(ctx);
+					//this.fireMissileTo(ctx);
+				}
+			}
+			else if(!this.target){
+				console.log('Updating Target!!')
+				const closestObject = this.getClosestEnemyTank();
+				if (closestObject) {
+					this.updateTarget(closestObject);
 				}
 			}
 			else{
-
+				//console.log('Firing!!')
 				this.fireMissileTo(ctx);
 			}
 		}
@@ -350,12 +355,14 @@ export class Tank {
 	/** DAMAGING ***************************************************************** */
 
 	addDamage(power: number) {
+		this.damage += power;
+		this.comp.damage = this.damage / this.armor;
 		if (this.comp.damage >= 1) {
+			console.log('Tank exploiding', this);
 			this.explode();
 			return;
 		}
-		this.damage += power;
-		this.comp.damage = this.damage / this.armor;
+
 
 	}
 

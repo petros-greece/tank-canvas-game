@@ -43,23 +43,29 @@ export class TankBuilder {
       private decideStartPosition(builderOpts: BuilderOptions, tankOpts: TankOptions): { x: number; y: number } {
         let position = { x: 0, y: 0 };
     
+        // Check if x and y positions are defined in tankOpts.position
+        const hasX = tankOpts.position?.x !== undefined && tankOpts.position.x !== 0;
+        const hasY = tankOpts.position?.y !== undefined && tankOpts.position.y !== 0;
+    
         // Set the starting position based on the direction specified in builderOpts
-        if (builderOpts.dir === 'down') {         
-            position.y = this.cH + tankOpts.size * 14; 
-        } else if (builderOpts.dir === 'up') {     
-            position.y = -(tankOpts.size * 14); 
+        if (builderOpts.dir === 'down') {
+            position.y = this.cH + (tankOpts.size || 0) * 14; // Position below canvas
+            position.x = hasX ? tankOpts.position!.x : this.cW / 2 - (tankOpts.size || 0) * 7;
+        } else if (builderOpts.dir === 'up') {
+            position.y = -(tankOpts.size || 0) * 14; // Position above canvas
+            position.x = hasX ? tankOpts.position!.x : this.cW / 2 - (tankOpts.size || 0) * 7;
         } else if (builderOpts.dir === 'left') {
-            position.x = -tankOpts.size * 14;; // Start from the left edge
+            position.x = -(tankOpts.size || 0) * 14; // Position to the left of canvas
+            position.y = hasY ? tankOpts.position!.y : this.cH / 2 - (tankOpts.size || 0) * 7;
         } else if (builderOpts.dir === 'right') {
-            position.x = this.cW + tankOpts.size * 14; // Start from the right edge, taking tank width into account
-        } else {
-            // Default position if no direction is provided or recognized
-            position.x = tankOpts.position?.x?? 0;
-            position.y = tankOpts.position?.y?? 0;
+            position.x = this.cW + (tankOpts.size || 0) * 14; // Position to the right of canvas
+            position.y = hasY ? tankOpts.position!.y : this.cH / 2 - (tankOpts.size || 0) * 7;
         }
     
         return position;
     }
+    
+    
     
 
 

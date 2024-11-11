@@ -80,7 +80,7 @@ function test(){
 
 
 
-    let gameOptions = {
+    let stageOptions = {
       worldBuilders: [
         {
           builderOpts: {
@@ -147,7 +147,7 @@ function test(){
 
     }
 
-    let game = new Game(canvas, gameOptions);
+    let game = new Game(canvas, stageOptions);
     game.attachEvents();
 
     game.run();

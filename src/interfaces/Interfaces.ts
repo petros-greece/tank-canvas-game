@@ -8,6 +8,9 @@ export type PublicMethodNames<T> = {
 
 export type Direction = "up" | "down" | "left" | "right";
 
+export type TankBuilderOptions = {builderOpts:BuilderOptions, buildMethod: PublicMethodNames<TankBuilder>, objectOpts: TankOptions, frameInterval: number, repetitions: number};
+export type WorldBuilderOptions = {builderOpts:BuilderOptions, buildMethod:PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions};
+
 export interface Position {
     x: number;
     y: number;
@@ -134,8 +137,7 @@ export interface ObjectOptions {
     team?: string;
 }
 
-
-export interface GameOptions {
+export interface StageOptions {
     tanks?: Tank[];
     missiles?: Missile[];
     objects?: GameObject[];
@@ -155,7 +157,7 @@ export interface GameOptions {
         stageBackground: string;
     };
     worldBuilders?: {builderOpts:BuilderOptions, buildMethod: PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions}[]; // Define a more specific type if available
-    tankBuilders?:  {builderOpts:BuilderOptions, buildMethod: PublicMethodNames<TankBuilder>, objectOpts: TankOptions}[]; // Specify a more precise type if possible
+    tankBuilders?: TankBuilderOptions[]; // Specify a more precise type if possible
 
     worldObjects?: GameObject[];
     tankOpts?: TankOptions[]; // Define a more specific type if available
@@ -178,5 +180,6 @@ export interface BuilderOptions {
     sa?: number;
     type?: string;
     dir?: Direction;
+    percent?: number;
 }
 

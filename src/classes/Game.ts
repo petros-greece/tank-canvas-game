@@ -3,7 +3,7 @@ import { Missile } from "./Missile";
 import { GameObject } from "./Objects";
 import { WorldBuilder } from "./WorldBuilder";
 import { TankBuilder } from "./TankBuilder";
-import { TankOptions, GameOptions, ObjectOptions, BuilderOptions, PublicMethodNames } from "../interfaces/Interfaces";
+import { TankOptions, StageOptions, ObjectOptions, BuilderOptions, PublicMethodNames, TankBuilderOptions, WorldBuilderOptions } from "../interfaces/Interfaces";
 import { detectCollision, checkIfClicked }  from "../helpers";
 
 export class Game {
@@ -14,11 +14,10 @@ export class Game {
   tankOpts: TankOptions[];
 
   tankBuilder: TankBuilder;
-  tankBuilders:  {builderOpts:BuilderOptions, buildMethod:PublicMethodNames<TankBuilder>, objectOpts: TankOptions}[]; // Specify a more precise type if possible 
+  tankBuilders:  TankBuilderOptions[]; // Specify a more precise type if possible 
   tanks: Tank[];
-
   builder: WorldBuilder;
-  worldBuilders:  {builderOpts:BuilderOptions, buildMethod:PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions}[]; // Specify a more precise type if possible
+  worldBuilders:  WorldBuilderOptions[]; // Specify a more precise type if possible
   worldObjects: GameObject[];
 
   missiles: Missile[];
@@ -41,7 +40,7 @@ export class Game {
   selectedTank: Tank | null;
   interval: any;
 
-  constructor(canvas: HTMLCanvasElement, options: GameOptions = {}) {
+  constructor(canvas: HTMLCanvasElement, options: StageOptions = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.team = "Warriors";
@@ -91,15 +90,24 @@ export class Game {
       this.tanks.push(tank);
     });
 
-    this.tankBuilders.forEach((builder) => {
-      const objs = this.tankBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
-      objs?.forEach((opts) => {
-        const tank = new Tank(ctx, opts, this);
-        this.tanks.push(tank);
-      });
-    });
+
 
   }
+
+  checkForNewWorldEntries(){
+    this.tankBuilders.forEach((builder) => {
+      if(!(this.frame % builder.frameInterval) && builder.repetitions > 0){
+        console.log('frame for builder: ' + this.frame)
+        builder.repetitions-=1;
+        const objs = this.tankBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
+        objs?.forEach((opts) => {
+          const tank = new Tank(this.ctx, opts, this);
+          this.tanks.push(tank);
+        });
+      }
+    });
+  }
+
 
   run(): void {
     
@@ -109,6 +117,11 @@ export class Game {
 
     this.interval = setInterval(() => {
       ctx.clearRect(0, 0, cW, cH);
+      this.frame += 1;
+      if( !(this.frame%100) ){
+        console.log('Checking for entries');
+        this.checkForNewWorldEntries();
+      }
      
       //console.log(this);
       this.tanks.forEach((tank, index) => {
@@ -120,6 +133,9 @@ export class Game {
           if (!tank.isExploding && missile.owner !== tank.team && detectCollision(missile, tank) && !missile.isExploding) {
             missile.isExploding = true;
             tank.addDamage(10);
+            if(tank.comp.damage >=1 ){
+              console.log('Should be destroyed')
+            }
           }
         });
 
@@ -175,7 +191,6 @@ export class Game {
         missile.render();
       });
 
-      this.frame += 1;
     }, 10);
   }
 

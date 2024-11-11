@@ -1,9 +1,14 @@
+# Developed On
+
+node v18.16.0
+npm  v9.5.1
+
 # to do
 
-1. make objects optionally breakable;
+1. make objects optionally breakable; (done)
 2. Add more game logic
 3. Make calculations for the games realiability
-4. Add a timer
+4. Lock the viewport
 5. Add a scoreboard
 6. Add a leaderboard
 7. Add a pause menu
