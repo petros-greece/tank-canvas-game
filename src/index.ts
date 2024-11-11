@@ -1,5 +1,6 @@
 import { Game } from './classes/Game';
 import { StageBuilder } from './classes/StageBuilder';
+import { WorldBuilder } from './classes/WorldBuilder';
 import { StageOptions, BuilderOptions } from './interfaces/Interfaces';
 
 // Get the canvas element and its context
@@ -20,7 +21,7 @@ function resizeCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D):
 // Call the resize function initially
 resizeCanvas(canvas, ctx);
 
-let builder = new StageBuilder(canvas);
+let builder = new WorldBuilder(canvas);
 
 // Game options object with world builders and tank options
 const stageOptions:StageOptions = {
@@ -39,16 +40,16 @@ const stageOptions:StageOptions = {
     //     angle: 0,
     //   }
     // },
-   builder.giveVerticalObjectRow({width: 50, height: 50, position: { x: 450, y: 5 }}, {percent: 1.1}),
+   builder.giveVerticalObjectRow({width: 50, height: 50 }, {divider: 2}),
    //should be renamed to divider, also add x,y to builder options
-   builder.giveVerticalObjectRow({width: 50, height: 50, position: { x: 475, y: 25 }}, {}),
-  // builder.giveHorizontalObjectRow({width: 50, height: 50, position: { x: 0, y: 175 }}),
+   //builder.giveVerticalObjectRow({width: 50, height: 50, position: { x: 475, y: 25 }}, {}),
+   builder.giveHorizontalObjectRow({width: 50, height: 50}, {divider: 2}),
   ],
   tankBuilders: [
     {
       buildMethod: 'giveTeamOfTanks',
       builderOpts: { dir: 'right', num: 3, dy: 155, dx: 1, sa: 10 },
-      objectOpts: {
+      tankOpts: {
         size: 5,
         position: { x:0, y: 0 },
         weight: 1000,
@@ -98,7 +99,7 @@ const stageOptions:StageOptions = {
     {
       buildMethod: 'giveTeamOfTanks',
       builderOpts: { dir: 'down', num: 1, dy: 0, dx: 0, },
-      objectOpts: {
+      tankOpts: {
         size: 5,
         position: { x:0, y: 0 },
         weight: 1000,

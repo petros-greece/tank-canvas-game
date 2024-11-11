@@ -1,4 +1,4 @@
-import { BuilderOptions, ObjectOptions } from '../interfaces/Interfaces';
+import { BuilderOptions, ObjectOptions, WorldBuilderOptions } from '../interfaces/Interfaces';
 
 export class WorldBuilder {
   private cW: number;
@@ -72,8 +72,8 @@ export class WorldBuilder {
     let num = builderOpts.num || 1;
 
 
-    let positionX = objectOpts.position?.x ?? 0;
-    let positionY = objectOpts.position?.y ?? 0;
+    let positionX = builderOpts?.x ?? objectOpts.width/2;
+    let positionY = builderOpts?.y ?? objectOpts.height/2;
     let angle = objectOpts.angle ?? 0;
     let outOfBounds = true;
 
@@ -155,19 +155,51 @@ export class WorldBuilder {
 
   /******************************************************************************************************************************************/
 
-  protected giveVerticalWall() {
-    return {
-      buildMethod: 'giveSequenceOfObjects',
-      builderOpts: { type: 'vertical' },
-      objectOpts: {
-        height: 50,
-        width: 30,
-        position: { x: 250, y: 0 },
-        weight: 1000,
-        isBreakable: true
-      }
-    }
-  }
+
+  private transformTypeToPercentage(builderOpts: BuilderOptions, objectOpts: ObjectOptions, toWidth:boolean) : number {
+		if( builderOpts.divider ){
+			return builderOpts.divider ? (toWidth ? this.cW : this.cH) / builderOpts.divider : 0;
+		}
+		return  (toWidth ? objectOpts.position?.x : objectOpts.position?.y )?? 0;
+	}
+
+	giveVerticalObjectRow(objectOpts: ObjectOptions, builderOpts: BuilderOptions) : WorldBuilderOptions {
+		const objectOptions = Object.assign({
+			height: 50,
+			width: 30,
+			weight: 1000,
+			isBreakable: true
+		}, objectOpts);
+		builderOpts.x = this.transformTypeToPercentage(builderOpts, objectOptions, true);
+
+		const builderOptions = <BuilderOptions>Object.assign({
+			num: 100, dx: -objectOptions.width, dy: 0, type: 'inBounds'
+		}, builderOpts)
+
+		return {
+			buildMethod: 'giveTeamOfObjects',
+			builderOpts: <BuilderOptions>builderOptions,
+			objectOpts: objectOptions
+		};
+	}
+
+	giveHorizontalObjectRow(objectOpts: ObjectOptions, builderOpts: BuilderOptions) : WorldBuilderOptions {
+		const objectOptions = Object.assign({
+			height: 50,
+			width: 30,
+			weight: 1000,
+			isBreakable: true
+		}, objectOpts);
+		builderOpts.y = this.transformTypeToPercentage(builderOpts, objectOptions, false);
+		const builderOptions = <BuilderOptions>Object.assign({
+			num: 100, dy: -objectOptions.height, dx: 0, type: 'inBounds'
+		}, builderOpts)
+		return {
+			buildMethod: 'giveTeamOfObjects',
+			builderOpts: <BuilderOptions>builderOptions,
+			objectOpts: objectOptions
+		};
+	}
 
 
 }

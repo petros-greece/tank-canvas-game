@@ -77,13 +77,13 @@ export class Game {
   init(canvas: HTMLCanvasElement): void {
     const ctx = this.ctx;
 
-    this.worldBuilders.forEach((builder) => {
-      const objs = this.builder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
-      objs?.forEach((opts) => {
-        const gameObject = new GameObject(ctx, opts);
-        this.worldObjects.push(gameObject);
-      });
-    });
+    // this.worldBuilders.forEach((builder) => {
+    //   const objs = this.builder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
+    //   objs?.forEach((opts) => {
+    //     const gameObject = new GameObject(ctx, opts);
+    //     this.worldObjects.push(gameObject);
+    //   });
+    // });
 
     this.tankOpts.forEach((tankOpts) => {
       const tank = new Tank(ctx, tankOpts, this);
@@ -99,11 +99,11 @@ export class Game {
       if(!(this.frame % builder.frameInterval) && builder.repetitions > 0){
         console.log('frame for builder: ' + this.frame)
         builder.repetitions-=1;
-        const objs = this.tankBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
-        objs?.forEach((opts) => {
-          const tank = new Tank(this.ctx, opts, this);
-          this.tanks.push(tank);
-        });
+        // const objs = this.tankBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
+        // objs?.forEach((opts) => {
+        //   const tank = new Tank(this.ctx, opts, this);
+        //   this.tanks.push(tank);
+        // });
       }
     });
   }

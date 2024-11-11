@@ -8,26 +8,19 @@ export type PublicMethodNames<T> = {
 
 export type Direction = "up" | "down" | "left" | "right";
 
+export type TankBuilderOptions = {
+    builderOpts:BuilderOptions, 
+    buildMethod: PublicMethodNames<TankBuilder>, 
+    tankOpts: TankOptions, 
+    frameInterval: number, 
+    repetitions: number
+};
+export type WorldBuilderOptions = {builderOpts:BuilderOptions, buildMethod:PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions};
+
 export interface Position {
     x: number;
     y: number;
 }
-
-/********************************************************************************/
-
-export type TankBuilderOptions = {
-    builderOpts:BuilderOptions, 
-    buildMethod: PublicMethodNames<TankBuilder>, 
-    objectOpts: TankOptions, 
-    frameInterval: number, 
-    repetitions: number
-};
-
-export type WorldBuilderOptions = {
-    builderOpts:BuilderOptions, 
-    buildMethod:PublicMethodNames<WorldBuilder>, 
-    objectOpts: ObjectOptions
-};
 
 export interface MissileOptions {
     angle?: number;
@@ -38,7 +31,6 @@ export interface MissileOptions {
 }
 
 export interface TankOptions {
-    size: number;
     team?: string;
     id?: string;
     position?: Position;
@@ -50,9 +42,11 @@ export interface TankOptions {
     wheelTracksFill?: string;
     wheelTracksLineNum?: number;
     selectionColor?: string;
+    size: number;
     speed?: number;
     angle?: number;
     cannonAngle?: number;
+    isFiring?: boolean;
     weight?: number;
     reloadSpeed?: number;
     move?: string;
@@ -61,7 +55,6 @@ export interface TankOptions {
     target?: any;
     moveMethod?: string;
     armor?: number;
-    isFiring?: boolean;
     isSelected?:boolean;
 }
 
@@ -97,13 +90,16 @@ export interface StageOptions {
         maxTanks: number;
         stageBackground: string;
     };
-    worldBuilders?: WorldBuilderOptions[]; 
-    tankBuilders?: TankBuilderOptions[]; 
+    worldBuilders?: {builderOpts:BuilderOptions, buildMethod: PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions}[]; // Define a more specific type if available
+    tankBuilders?: TankBuilderOptions[]; // Specify a more precise type if possible
+
     worldObjects?: GameObject[];
-    tankOpts?: TankOptions[]; 
+    tankOpts?: TankOptions[]; // Define a more specific type if available
 }
 
 export interface BuilderOptions {
+    x?:number;
+    y?:number;
     num?: number;
     dx?: number;
     dy?: number;
@@ -112,10 +108,33 @@ export interface BuilderOptions {
     sa?: number;
     type?: string;
     dir?: Direction;
-    percent?: number;
+    divider?: number;
 }
 
-/********************************************************************************/
+export interface Game {
+    frame: number;
+    tanks: any[];
+    addMissile: (missile: Missile) => void;
+}
+
+export interface GameObject {
+    ctx: CanvasRenderingContext2D;
+    position: Position;
+    moveToPos: Position;
+    width: number;
+    height: number;
+    color: string;
+    isColliding: boolean;
+    comp: any;   
+    speed: number;
+    weight: number;
+    angle: number;
+    armor: number;
+    damage: number;
+    moveToAngle: number;
+    id?: string;  
+    isBreakable: boolean;
+}
 
 export interface Tank {
     ctx: CanvasRenderingContext2D;
@@ -163,32 +182,5 @@ export interface Tank {
 
     move: () => void;  // Define parameters if move takes any
 }
-
-
-export interface Game {
-    frame: number;
-    tanks: any[];
-    addMissile: (missile: Missile) => void;
-}
-
-export interface GameObject {
-    ctx: CanvasRenderingContext2D;
-    position: Position;
-    moveToPos: Position;
-    width: number;
-    height: number;
-    color: string;
-    isColliding: boolean;
-    comp: any;   
-    speed: number;
-    weight: number;
-    angle: number;
-    armor: number;
-    damage: number;
-    moveToAngle: number;
-    id?: string;  
-    isBreakable: boolean;
-}
-
 
 

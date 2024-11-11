@@ -1,60 +1,83 @@
-import { BuilderOptions, ObjectOptions, StageOptions, WorldBuilderOptions } from "../interfaces/Interfaces";
+import { BuilderOptions, ObjectOptions, StageOptions, WorldBuilderOptions, } from "../interfaces/Interfaces";
+import { TankBuilder } from "./TankBuilder";
+import { WorldBuilder } from "./WorldBuilder";
 
 export class StageBuilder {
-  private cW: number;
-  private cH: number;
+	private cW: number;
+	private cH: number;
+	private worldbuilder: WorldBuilder;
+	private tankBuilder: TankBuilder;
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.cW = canvas.width;
-    this.cH = canvas.height;
-  }
+	constructor(canvas: HTMLCanvasElement) {
+		this.cW = canvas.width;
+		this.cH = canvas.height;
+		this.worldbuilder = new WorldBuilder(canvas);
+		this.tankBuilder = new TankBuilder(canvas);
+	}
 
-	private transformTypeToPercentage(builderOpts: BuilderOptions, objectOpts: ObjectOptions, toWidth:boolean) : number {
-		if( builderOpts.percent ){
-			return builderOpts.percent ? (toWidth ? this.cW : this.cH) / builderOpts.percent : 
-			(toWidth ? objectOpts.position?.x : objectOpts.position?.y )?? 0;
+
+	stage1() {
+		const stageOptions: StageOptions = {
+			worldBuilders: [
+				this.worldbuilder.giveVerticalObjectRow({ width: 50, height: 50 }, { divider: 2 }),
+				this.worldbuilder.giveVerticalObjectRow({ width: 50, height: 50 }, {}),
+				this.worldbuilder.giveHorizontalObjectRow({ width: 50, height: 50 }, { divider: 2 }),
+			],
+			tankBuilders: [
+				{
+					buildMethod: 'giveTeamOfTanks',
+					builderOpts: { dir: 'right', num: 3, dy: 155, dx: 1, sa: 10 },
+					tankOpts: {
+						size: 5,
+						position: { x: 0, y: 0 },
+						weight: 1000,
+						moveMethod: 'findClosestTank',
+						isFiring: true,
+						reloadSpeed: 70,
+						team: 'bad guys'
+					},
+					frameInterval: 1000,
+					repetitions: 3
+				},
+				{
+					buildMethod: 'giveTeamOfTanks',
+					builderOpts: { dir: 'down', num: 1, dy: 0, dx: 0, },
+					tankOpts: {
+						size: 5,
+						position: { x: 0, y: 0 },
+						weight: 1000,
+						moveMethod: 'findClosestTank',
+						isFiring: true,
+						bodyFill: 'orange',
+						wheelTracksFill: 'yellow',
+						reloadSpeed: 70,
+						team: 'bad guys',
+						speed: 1.5
+					},
+					frameInterval: 500,
+					repetitions: 8
+				},
+			],
+			tankOpts: [
+				{
+					position: { x: 200, y: 365 },
+					moveToPos: { x: 200, y: 365 },
+					size: 8,
+					speed: 1,
+					cannonAngle: 0,
+					bodyFill: 'red',
+					id: 'test_1',
+					team: 'Warriors',
+					moveMethod: 'moveTo',
+					isFiring: true,
+					reloadSpeed: 20,
+					armor: 10000,
+				},
+			]
+
 		}
-		return  (toWidth ? objectOpts.position?.x : objectOpts.position?.y )?? 0;
-	}
 
-
-
-	giveVerticalObjectRow(objectOpts: ObjectOptions, builderOpts: BuilderOptions) : WorldBuilderOptions {
-		let objectOptions = Object.assign({
-			height: 50,
-			width: 30,
-			position: { x: 250, y: 0 },
-			weight: 1000,
-			isBreakable: true
-		}, objectOpts);
-		objectOptions.position.x = this.transformTypeToPercentage(builderOpts, objectOptions, true);
-
-		const builderOptions = <BuilderOptions>Object.assign({
-			num: 100, dx: -objectOptions.width, dy: 0, type: 'inBounds'
-		}, builderOpts)
-
-		return {
-			buildMethod: 'giveTeamOfObjects',
-			builderOpts: <BuilderOptions>builderOptions,
-			objectOpts: objectOptions
-		};
-	}
-
-	giveHorizontalObjectRow(objectOpts: ObjectOptions) : WorldBuilderOptions {
-		const objectOptions = Object.assign({
-			height: 50,
-			width: 30,
-			position: { x: 250, y: 0 },
-			weight: 1000,
-			isBreakable: true
-		}, objectOpts);
-
-		return {
-			buildMethod: 'giveTeamOfObjects',
-			builderOpts: <BuilderOptions>{ num: 100, dx: 0, dy: -objectOptions.height, type: 'inBounds' },
-			objectOpts: objectOptions
-		};
-	}
+	};
 
 
 
