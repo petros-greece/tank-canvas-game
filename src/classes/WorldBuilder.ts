@@ -20,7 +20,7 @@ export class WorldBuilder {
     }
   }
 
-  giveSequenceOfObjects(builderOpts: BuilderOptions, objectOpts: ObjectOptions): ObjectOptions[] {
+  protected giveSequenceOfObjects(builderOpts: BuilderOptions, objectOpts: ObjectOptions): ObjectOptions[] {
     const objects: ObjectOptions[] = [];
 
     let { dx, dy, sx, sy, sa } = this.giveObjectDefaults(builderOpts, objectOpts);
@@ -66,7 +66,7 @@ export class WorldBuilder {
 
   /*********************************************************************** */
 
-  giveTeamOfObjects(builderOpts: BuilderOptions, objectOpts: ObjectOptions): ObjectOptions[] {
+  protected giveTeamOfObjects(builderOpts: BuilderOptions, objectOpts: ObjectOptions): ObjectOptions[] {
     const objects: ObjectOptions[] = [];
     let { dx, dy, sx, sy, sa } = this.giveObjectDefaults(builderOpts, objectOpts);
     let num = builderOpts.num || 1;
@@ -163,7 +163,7 @@ export class WorldBuilder {
 		return  (toWidth ? objectOpts.position?.x : objectOpts.position?.y )?? 0;
 	}
 
-	giveVerticalObjectRow(objectOpts: ObjectOptions, builderOpts: BuilderOptions) : WorldBuilderOptions {
+	giveVerticalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions, ) : WorldBuilderOptions {
 		const objectOptions = Object.assign({
 			height: 50,
 			width: 30,
@@ -183,7 +183,7 @@ export class WorldBuilder {
 		};
 	}
 
-	giveHorizontalObjectRow(objectOpts: ObjectOptions, builderOpts: BuilderOptions) : WorldBuilderOptions {
+	giveHorizontalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions) : WorldBuilderOptions {
 		const objectOptions = Object.assign({
 			height: 50,
 			width: 30,

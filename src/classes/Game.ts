@@ -17,7 +17,7 @@ export class Game {
   tankBuilders:  TankBuilderOptions[]; // Specify a more precise type if possible 
   tanks: Tank[];
   builder: WorldBuilder;
-  worldBuilders:  WorldBuilderOptions[]; // Specify a more precise type if possible
+  //worldBuilders:  WorldBuilderOptions[]; // Specify a more precise type if possible
   worldObjects: GameObject[];
 
   missiles: Missile[];
@@ -40,13 +40,14 @@ export class Game {
   selectedTank: Tank | null;
   interval: any;
 
-  constructor(canvas: HTMLCanvasElement, options: StageOptions = {}) {
+  constructor(canvas: HTMLCanvasElement, options: StageOptions) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.team = "Warriors";
     this.frame = 0;
     this.tanks = [];
     this.missiles = [];
+    this.worldObjects = [];
     this.stage = options.stage || 1;
     this.score = options.score || 0;
     this.time = options.time || 0;
@@ -65,8 +66,7 @@ export class Game {
     this.builder = new WorldBuilder(canvas);
     this.tankBuilder = new TankBuilder(canvas);
     this.tankBuilders = options.tankBuilders || [];
-    this.worldBuilders = options.worldBuilders || [];
-    this.worldObjects = [];
+    //this.worldBuilders = options.worldBuilders || [];
     this.tankOpts = options.tankOpts || [];
     this.selectedTank= null;
     this.interval = null;

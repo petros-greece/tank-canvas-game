@@ -1,11 +1,11 @@
-import { Game, TankOptions, Position } from "../interfaces/Interfaces";
+import { Game, TankOptions, Position, StageI } from "../interfaces/Interfaces";
 import { Missile } from "./Missile";
 
 export class Tank {
 	private ctx: CanvasRenderingContext2D;
 	public team: string;
 	public id: string;
-	private game: Game;
+	private stage: StageI;
 
 	public position: Position;
 	public moveToPos: Position;
@@ -48,11 +48,11 @@ export class Tank {
 
 	public move: Function;
 
-	constructor(ctx: CanvasRenderingContext2D, options: TankOptions, game: Game) {
+	constructor(ctx: CanvasRenderingContext2D, options: TankOptions, stage: StageI) {
 		this.ctx = ctx;
 		this.team = options.team || '';
 		this.id = options.id || `tank_${new Date().getTime()}`;
-		this.game = game;
+		this.stage = stage;
 
 		this.position = options.position || { x: 200, y: 200 };
 		this.moveToPos = options.moveToPos || { ...this.position };
@@ -430,8 +430,8 @@ export class Tank {
 			owner: this.team
 		});
 
-		// Add the missile to the game's missiles array
-		this.game.addMissile(missile);
+		// Add the missile to the stage's missiles array
+		this.stage.addMissile(missile);
 	}
 
 	fireMissileTo(ctx: CanvasRenderingContext2D) {
@@ -446,7 +446,7 @@ export class Tank {
 		}
 		if (!this.canShoot) {
 
-			this.canShoot = Math.min(this.game.frame % this.reloadSpeed) === 0;
+			this.canShoot = Math.min(this.stage.frame % this.reloadSpeed) === 0;
 		}
 
 		this.normalizeCannonAngle();
@@ -518,7 +518,7 @@ export class Tank {
 		let closestObject: any = null;
 		let minDistance = Infinity;
 
-		this.game.tanks.forEach(tank => {
+		this.stage.tanks.forEach(tank => {
 			if (this.isEnemyTank(tank)) {
 				const distance = this.calculateDistance(tank.position);
 				if (distance < minDistance) {

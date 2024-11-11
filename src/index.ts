@@ -40,10 +40,10 @@ const stageOptions:StageOptions = {
     //     angle: 0,
     //   }
     // },
-   builder.giveVerticalObjectRow({width: 50, height: 50 }, {divider: 2}),
+   //builder.giveVerticalObjectRow({width: 50, height: 50 }, {divider: 2}),
    //should be renamed to divider, also add x,y to builder options
-   //builder.giveVerticalObjectRow({width: 50, height: 50, position: { x: 475, y: 25 }}, {}),
-   builder.giveHorizontalObjectRow({width: 50, height: 50}, {divider: 2}),
+   ////builder.giveVerticalObjectRow({width: 50, height: 50, position: { x: 475, y: 25 }}, {}),
+   //builder.giveHorizontalObjectRow({width: 50, height: 50}, {divider: 2}),
   ],
   tankBuilders: [
     {
@@ -116,6 +116,25 @@ const stageOptions:StageOptions = {
     },
   ],
   tankOpts: [
+
+    {
+      position: { x: 200, y: 365 },
+      moveToPos: { x: 200, y: 365 },
+      size: 5,
+      speed: 2,
+      cannonAngle: 0,
+      bodyFill: 'yellow',
+      cannonFill: '#b8640b',
+      wheelTracksFill: 'orange',
+      wheelTracksStroke: '#000',
+      id: 'light',
+      team: 'Warriors',
+      moveMethod: 'moveTo',
+      isFiring: false,
+      reloadSpeed: 20,
+      armor: 10000,
+    },
+
     // {
     //   position: { x: 825, y: 75 },
     //   size: 5,
@@ -126,20 +145,20 @@ const stageOptions:StageOptions = {
     //   team: 'Warriors',
     //   moveMethod: 'moveTo',
     // },
-    {
-      position: { x: 200, y: 365 },
-      moveToPos: { x: 200, y: 365 },
-      size: 8,
-      speed: 1,
-      cannonAngle: 0,
-      bodyFill: 'red',
-      id: 'test_1',
-      team: 'Warriors',
-      moveMethod: 'moveTo',
-      isFiring: true,
-      reloadSpeed: 20,
-      armor: 10000,
-    },
+    // {
+    //   position: { x: 200, y: 365 },
+    //   moveToPos: { x: 200, y: 365 },
+    //   size: 8,
+    //   speed: 1,
+    //   cannonAngle: 0,
+    //   bodyFill: 'red',
+    //   id: 'test_1',
+    //   team: 'Warriors',
+    //   moveMethod: 'moveTo',
+    //   isFiring: true,
+    //   reloadSpeed: 20,
+    //   armor: 10000,
+    // },
     // {
     //   position: { x: 200, y: 200 },
     //   bodyFill: "rgba(128, 128, 128, 1)",

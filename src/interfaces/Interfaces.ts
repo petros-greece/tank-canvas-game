@@ -6,6 +6,10 @@ export type PublicMethodNames<T> = {
     [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
   }[keyof T];
 
+export type RenderTankMethod = 'veryLightTank' | 'lightTank' | 'mediumTank' | 'heavyTank';
+export type RenderObjectMethod = 'giveTeamOfObjects';
+
+
 export type Direction = "up" | "down" | "left" | "right";
 
 export type TankBuilderOptions = {
@@ -15,7 +19,11 @@ export type TankBuilderOptions = {
     frameInterval: number, 
     repetitions: number
 };
-export type WorldBuilderOptions = {builderOpts:BuilderOptions, buildMethod:PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions};
+export type WorldBuilderOptions = {
+    builderOpts:BuilderOptions, 
+    buildMethod:RenderObjectMethod, 
+    objectOpts: ObjectOptions
+};
 
 export interface Position {
     x: number;
@@ -42,7 +50,7 @@ export interface TankOptions {
     wheelTracksFill?: string;
     wheelTracksLineNum?: number;
     selectionColor?: string;
-    size: number;
+    size?: number;
     speed?: number;
     angle?: number;
     cannonAngle?: number;
@@ -90,11 +98,11 @@ export interface StageOptions {
         maxTanks: number;
         stageBackground: string;
     };
-    worldBuilders?: {builderOpts:BuilderOptions, buildMethod: PublicMethodNames<WorldBuilder>, objectOpts: ObjectOptions}[]; // Define a more specific type if available
+    worldBuilders:WorldBuilderOptions[]; // Define a more specific type if available
     tankBuilders?: TankBuilderOptions[]; // Specify a more precise type if possible
 
     worldObjects?: GameObject[];
-    tankOpts?: TankOptions[]; // Define a more specific type if available
+    tankOpts: TankOptions[]; // Define a more specific type if available
 }
 
 export interface BuilderOptions {
@@ -112,6 +120,12 @@ export interface BuilderOptions {
 }
 
 export interface Game {
+    frame: number;
+    tanks: any[];
+    addMissile: (missile: Missile) => void;
+}
+
+export interface StageI {
     frame: number;
     tanks: any[];
     addMissile: (missile: Missile) => void;
