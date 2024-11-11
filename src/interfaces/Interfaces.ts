@@ -6,7 +6,10 @@ export type PublicMethodNames<T> = {
     [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
   }[keyof T];
 
-export type RenderTankMethod = 'veryLightTank' | 'lightTank' | 'mediumTank' | 'heavyTank';
+export type RenderTankMethod =   'veryLightTank' | 'lightTank' | 'mediumTank' | 'heavyTank';
+
+export type BuildTankMethod = 'giveTeamOfTanks' | 'giveHorizontalObjectRow';
+
 export type RenderObjectMethod = 'giveTeamOfObjects';
 
 
@@ -14,7 +17,7 @@ export type Direction = "up" | "down" | "left" | "right";
 
 export type TankBuilderOptions = {
     builderOpts:BuilderOptions, 
-    buildMethod: PublicMethodNames<TankBuilder>, 
+    buildMethod: BuildTankMethod, 
     tankOpts: TankOptions, 
     frameInterval: number, 
     repetitions: number

@@ -90,12 +90,7 @@ export class TankBuilder {
 
 	}
 
-	giveTanksFromTheRight(
-		renderMethod: RenderTankMethod, 
-		frameInterval: number = 1000, 
-		repetitions: number = 1,
-		builderOpts?: BuilderOptions, 
-		tankOpts?: TankOptions): TankBuilderOptions {
+	giveTanksFromTheRight( renderMethod: RenderTankMethod, frameInterval: number = 1000, repetitions: number = 1, builderOpts?: BuilderOptions, tankOpts?: TankOptions): TankBuilderOptions {
 		return {
 			buildMethod: 'giveTeamOfTanks',
 			builderOpts: { dir: 'right', num: 3, dy: 155, dx: 1, sa: 10, ...builderOpts },

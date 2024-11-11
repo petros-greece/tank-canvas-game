@@ -27,27 +27,23 @@ export class Stage {
         this.tankBuilder = new TankBuilder(canvas);
     }
 
-    giveObjects(): GameObject[]{
-        let stageObjects:GameObject[] = [];
+    giveObjects(){
         const stageOptions  = this.stageBuilder.stage1();
         stageOptions.worldBuilders.forEach((builder) => {
         const objs = this.worldBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
           objs?.forEach((opts) => {
             const gameObject = new GameObject(this.ctx, opts);
-            stageObjects.push(gameObject);
+            this.stageObjects.push(gameObject);
           });
         });
-        return stageObjects;
     }
 
-    giveTanks(): Tank[] {
+    giveTanks() {
         const stageOptions  = this.stageBuilder.stage1();
-        const tanks: Tank[] = [];
         stageOptions.tankOpts.forEach((tankOpts) => {
             const tank = new Tank(this.ctx, tankOpts, this);
-            tanks.push(tank);
+            this.tanks.push(tank);
           });
-        return tanks;
     }
 
 		checkForStageNewEntries(){
@@ -55,14 +51,22 @@ export class Stage {
 				if(!(this.frame % builder.frameInterval) && builder.repetitions > 0){
 					console.log('frame for builder: ' + this.frame)
 					builder.repetitions-=1;
-					// const objs = this.tankBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
-					// objs?.forEach((opts) => {
-					//   const tank = new Tank(this.ctx, opts, this);
-					//   this.tanks.push(tank);
-					// });
+					const objs = this.tankBuilder[builder.buildMethod](builder.renderMethod);
+					objs?.forEach((opts) => {
+					  const tank = new Tank(this.ctx, opts, this);
+					  this.enemyTanks.push(tank);
+					});
 				}
 			});				
 		}
+
+		init(){
+			this.giveObjects();
+      this.giveTanks();
+		}
+
+
+
 
 		checkForVictory(){
 
@@ -77,7 +81,7 @@ export class Stage {
 		}
 
 		attachEvents(){
-			
+
 		}
 
 
