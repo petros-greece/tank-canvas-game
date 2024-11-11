@@ -40,6 +40,7 @@ const stageOptions:StageOptions = {
     //   }
     // },
    builder.giveVerticalObjectRow({width: 50, height: 50, position: { x: 450, y: 5 }}, {percent: 1.1}),
+   //should be renamed to divider, also add x,y to builder options
    builder.giveVerticalObjectRow({width: 50, height: 50, position: { x: 475, y: 25 }}, {}),
   // builder.giveHorizontalObjectRow({width: 50, height: 50, position: { x: 0, y: 175 }}),
   ],
