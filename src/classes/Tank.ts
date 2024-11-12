@@ -373,7 +373,7 @@ export class Tank {
 
 	addDamage(power: number) {
 		this.damage += power;
-		this.comp.damage = this.damage / this.armor;
+		this.comp.damage = Math.min(this.damage / this.armor, 1);
 		if (this.comp.damage >= 1) {
 			console.log('Tank exploiding', this);
 			this.explode();
