@@ -14,6 +14,7 @@ export class Stage {
     private worldBuilder: WorldBuilder;
     private tankBuilder: TankBuilder;
     private tankBuilders: TankBuilderOptions[] = [];
+    private currentTankBuilder: number = 0;
 
     public missiles: Missile[] = [];
     public tanks: Tank[] = [];
@@ -31,9 +32,9 @@ export class Stage {
 
     //Ihe equaliry is witho one tank because it wont be destroyed before checking but will be afterwards
     //cause of the game loop
-    checkForVictory(team:string) : boolean{
-      return ( this.tankBuilders.filter( builder => builder.repetitions === 0 ) ).length === this.tankBuilders.length
-              && (this.tanks.filter( tank => tank.team !== team )).length === 1;
+    checkForVictory(myTeam:string) : boolean{
+      return this.currentTankBuilder === (this.tankBuilders.length-1) && this.tankBuilders[this.currentTankBuilder].repetitions === 0 &&
+            (this.tanks.filter( tank => tank.team !== myTeam )).length === 1;
     }
 
     giveObjects(){
@@ -61,18 +62,29 @@ export class Stage {
     }
 
 		checkForStageNewEntries(){
-			this.tankBuilders.forEach((builder) => {
-				if(!(this.frame % builder.frameInterval) && builder.repetitions > 0){
-          console.log(this.tankBuilders)
-					builder.repetitions-=1;
-					const objs = this.tankBuilder[builder.buildTankMethod](builder.builderOpts, builder.tankOpts);
-					objs?.forEach((opts) => {
-					  const tank = new Tank(this.canvas, opts, this);
-					  this.tanks.push(tank);
-					});
-				}
-			});				
+      let builder = this.tankBuilders[this.currentTankBuilder]
+      if( (builder.repetitions > 0 ) && !(this.frame % builder.frameInterval) ){
+        builder.repetitions-=1;
+        this.addBuilderTanksToGame(builder);
+        if( builder.repetitions === 0 && this.currentTankBuilder < (this.tankBuilders.length - 1) ){
+          this.currentTankBuilder+=1;
+        }
+      }
+							
 		}
+
+    private addBuilderTanksToGame(builder: TankBuilderOptions){
+      const objs = this.tankBuilder[builder.buildTankMethod](builder.builderOpts, builder.tankOpts);
+      objs?.forEach((opts) => {
+        const tank = new Tank(this.canvas, opts, this);
+        this.tanks.push(tank);
+      });
+    }
+
+    mpla(){
+
+    }
+
 
 		init(){
 			this.giveObjects();
