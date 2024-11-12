@@ -29,6 +29,13 @@ export class Stage {
         this.tankBuilder = new TankBuilder(canvas);
     }
 
+    //Ihe equaliry is witho one tank because it wont be destroyed before checking but will be afterwards
+    //cause of the game loop
+    checkForVictory(team:string) : boolean{
+      return ( this.tankBuilders.filter( builder => builder.repetitions === 0 ) ).length === this.tankBuilders.length
+              && (this.tanks.filter( tank => tank.team !== team )).length === 1;
+    }
+
     giveObjects(){
         const stageOptions  = this.stageBuilder.stage1();
         stageOptions.worldBuilders.forEach((builder) => {
@@ -56,7 +63,7 @@ export class Stage {
 		checkForStageNewEntries(){
 			this.tankBuilders.forEach((builder) => {
 				if(!(this.frame % builder.frameInterval) && builder.repetitions > 0){
-					console.log('frame for builder: ' + this.frame)
+          console.log(this.tankBuilders)
 					builder.repetitions-=1;
 					const objs = this.tankBuilder[builder.buildTankMethod](builder.builderOpts, builder.tankOpts);
 					objs?.forEach((opts) => {
@@ -76,9 +83,6 @@ export class Stage {
 
 
 
-		checkForVictory(){
-
-		}
 
 		checkForLoss(){
 

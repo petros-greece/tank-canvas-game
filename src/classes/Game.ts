@@ -60,9 +60,6 @@ export class Game extends Stage {
   }
 
 
-
-
-
   run(): void {
     
     const ctx = this.ctx;
@@ -88,8 +85,9 @@ export class Game extends Stage {
             missile.isExploding = true;
             tank.addDamage(missile.force);
             if(tank.comp.damage >=1 ){
-              //tank.explode();
-              console.log('Should be destroyed')
+              if( this.checkForVictory(this.team) ){
+                alert('You re the greatest');
+              }
             }
           }
         });
@@ -99,7 +97,6 @@ export class Game extends Stage {
           if (otherTankIndex !== index && detectCollision(otherTank, tank)) {
             //console.log('collides')
             tank.collide(otherTank);
-            //otherTank.collide(tank);
             tank.moveToPos = tank.position;
           }
         });
