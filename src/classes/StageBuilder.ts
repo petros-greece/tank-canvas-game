@@ -25,8 +25,8 @@ export class StageBuilder {
 				//this.worldbuilder.giveHorizontalObjectRow( { divider: 2 }, { width: 50, height: 50 },),
 			],
 			tankBuilders: [
-				this.tankBuilder.giveTanksFromTheRight('veryLightTank', 1, 1 ),
-				this.tankBuilder.giveTanksFromTheRight('lightTank', 2000),
+				this.tankBuilder.giveTanksFromTheRight('veryLightTank', 300, 4 ),
+				this.tankBuilder.giveTanksFromTheRight('lightTank', 0, 4, {type: 'sequence'}),
 				//this.tankBuilder.giveTanksFromTheRight('mediumTank', 4000),
 				//this.tankBuilder.giveTanksFromTheRight('heavyTank', 6000),
 

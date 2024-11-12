@@ -62,7 +62,20 @@ export class Stage {
     }
 
 		checkForStageNewEntries(){
-      let builder = this.tankBuilders[this.currentTankBuilder]
+      let builder = this.tankBuilders[this.currentTankBuilder];
+
+      console.log('yo',this.currentTankBuilder, (this.tanks.filter( tank => tank.team !== 'Warriors' )).length )
+      if( this.currentTankBuilder > 0 && (this.tanks.filter( tank => tank.team !== 'Warriors' )).length === 0 && 
+          builder.builderOpts.type === 'sequence' &&  builder.repetitions > 0){
+            alert('adding')
+            builder.repetitions-=1;
+            this.addBuilderTanksToGame(builder);
+            if( builder.repetitions === 0 && this.currentTankBuilder < (this.tankBuilders.length - 1) ){
+              this.currentTankBuilder+=1;
+            }
+        return;
+      }
+
       if( (builder.repetitions > 0 ) && !(this.frame % builder.frameInterval) ){
         builder.repetitions-=1;
         this.addBuilderTanksToGame(builder);

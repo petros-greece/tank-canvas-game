@@ -47,7 +47,7 @@ export class TankBuilder {
 		// Check if x and y positions are defined in tankOpts.position
 		const hasX = builderOpts?.x !== undefined && builderOpts.x > -1;
 		const hasY = builderOpts?.y !== undefined && builderOpts.y > -1;
-		console.log(hasX, hasY)
+		//console.log(hasX, hasY)
 
 		// Set the starting position based on the direction specified in builderOpts
 		if (builderOpts.dir === 'down') {
@@ -77,7 +77,7 @@ export class TankBuilder {
 
 		for (let i = 0; i < num; i++) {
 			const obj = this.createTank(i, tankOpts, positionX, positionY, angle);
-			console.log(positionX, positionY);
+			//console.log(positionX, positionY);
 			objects.push(obj);
 
 			const [newPositionX, newPositionY] = this.calculateNewPosition(dx, dy, angle, positionX, positionY);
@@ -113,7 +113,7 @@ export class TankBuilder {
 				...builderOpts
 			},
 			tankOpts: this[renderMethod]({cannonAngle: 180, ...tankOpts}),
-			frameInterval: frameInterval,
+			frameInterval: frameInterval === 0 ? 999999 : frameInterval,
 			repetitions: repetitions
 		}
 	}
