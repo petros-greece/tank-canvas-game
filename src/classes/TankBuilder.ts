@@ -9,7 +9,8 @@ export class TankBuilder {
 		this.cH = canvas.height;
 	}
 
-	private giveTankDefaults(builderOpts: BuilderOptions, objectOpts: TankOptions): { dx: number, dy: number, sx: number, sy: number, sa: number } {
+	private giveBuilderDefaults(builderOpts: BuilderOptions, objectOpts: TankOptions): { 
+		dx: number, dy: number, sx: number, sy: number, sa: number } {
 		const s = objectOpts?.size ?? 5;
 		return {
 			dx: builderOpts.dx ? builderOpts.dx + s * 14 : s * 14,
@@ -44,8 +45,9 @@ export class TankBuilder {
 		let position = { x: 0, y: 0 };
 
 		// Check if x and y positions are defined in tankOpts.position
-		const hasX = builderOpts?.x !== undefined && builderOpts.x !== 0;
-		const hasY = builderOpts?.y !== undefined && builderOpts.y !== 0;
+		const hasX = builderOpts?.x !== undefined && builderOpts.x > -1;
+		const hasY = builderOpts?.y !== undefined && builderOpts.y > -1;
+		console.log(hasX, hasY)
 
 		// Set the starting position based on the direction specified in builderOpts
 		if (builderOpts.dir === 'down') {
@@ -67,7 +69,7 @@ export class TankBuilder {
 
 	giveTeamOfTanks(builderOpts: BuilderOptions, tankOpts: TankOptions): TankOptions[] {
 		const objects: TankOptions[] = [];
-		let { dx, dy, sx, sy, sa } = this.giveTankDefaults(builderOpts, tankOpts);
+		let { dx, dy, sx, sy, sa } = this.giveBuilderDefaults(builderOpts, tankOpts);
 		let num = builderOpts.num || 1;
 
 		let { x: positionX, y: positionY } = this.decideStartPosition(builderOpts, tankOpts);
@@ -75,6 +77,7 @@ export class TankBuilder {
 
 		for (let i = 0; i < num; i++) {
 			const obj = this.createTank(i, tankOpts, positionX, positionY, angle);
+			console.log(positionX, positionY);
 			objects.push(obj);
 
 			const [newPositionX, newPositionY] = this.calculateNewPosition(dx, dy, angle, positionX, positionY);
@@ -90,11 +93,26 @@ export class TankBuilder {
 
 	}
 
-	giveTanksFromTheRight( renderMethod: RenderTankMethod, frameInterval: number = 1000, repetitions: number = 1, builderOpts?: BuilderOptions, tankOpts?: TankOptions): TankBuilderOptions {
+	giveTanksFromTheRight( renderMethod: RenderTankMethod, frameInterval: number = 1000, repetitions: number = 1, builderOpts?: BuilderOptions, tankOpts?: TankOptions): 
+		TankBuilderOptions {
+
+		const tanksNum: number = builderOpts?.num || 2;
+		const tankSize: number = tankOpts?.size || 5;
+		const dy = (tanksNum !== 1) ?  Math.round( this.cH / (tanksNum -1 )) : this.cH/2
+	
 		return {
-			buildMethod: 'giveTeamOfTanks',
-			builderOpts: { dir: 'right', num: 3, dy: 155, dx: 1, sa: 10, ...builderOpts },
-			tankOpts: this[renderMethod](tankOpts),
+			buildTankMethod: 'giveTeamOfTanks',
+			builderOpts: { 
+				dir: 'right', 
+				y: 0, 
+				x: 0,
+				dy: dy,
+				dx: -tankSize * 14,
+				num: tanksNum, 
+				sa: 0, 
+				...builderOpts
+			},
+			tankOpts: this[renderMethod]({cannonAngle: 180, ...tankOpts}),
 			frameInterval: frameInterval,
 			repetitions: repetitions
 		}
@@ -102,78 +120,79 @@ export class TankBuilder {
 
 	/*********************************************************************************** */
 
+	veryLightTank(tankOpts: TankOptions = { size: 4 }): TankOptions {
+		return {
+			size: 4,
+			speed: 2,
+			bodyFill: '#f7b264',            // Light orange
+			cannonFill: '#b5803d',          // Medium brown
+			wheelTracksFill: '#8d5a1c',     // Dark brown
+			wheelTracksStroke: '#333',      // Dark gray
+			id: 'very_light_tank_' + new Date().getTime(),
+			team: 'bad guys',
+			moveMethod: 'findClosestTank',
+			isFiring: true,
+			reloadSpeed: 20,
+			armor: 50,
+			...tankOpts
+		};
+	}
+	
+	lightTank(tankOpts: TankOptions = { size: 5 }): TankOptions {
+		return {
+			size: 5,
+			speed: 1.8,
+			bodyFill: '#c9a252',            // Light brownish yellow
+			cannonFill: '#5a5e9e',          // Slate blue
+			wheelTracksFill: '#45497a',     // Darker slate blue
+			wheelTracksStroke: '#222',      // Dark gray
+			id: 'light_tank_' + new Date().getTime(),
+			team: 'bad guys',
+			moveMethod: 'findClosestTank',
+			isFiring: true,
+			reloadSpeed: 25,
+			armor: 75,
+			...tankOpts
+		};
+	}
+	
+	mediumTank(tankOpts: TankOptions = { size: 6 }): TankOptions {
+		return {
+			size: 8,
+			speed: 1.2,
+			bodyFill: '#7f8a5b',            // Olive green
+			cannonFill: '#3e2e15',          // Dark brown
+			wheelTracksFill: '#2c3052',     // Dark navy
+			wheelTracksStroke: '#111',      // Very dark gray
+			id: 'medium_tank_' + new Date().getTime(),
+			team: 'bad guys',
+			moveMethod: 'findClosestTank',
+			isFiring: true,
+			reloadSpeed: 30,
+			armor: 100,
+			...tankOpts
+		};
+	}
+	
+	heavyTank(tankOpts: TankOptions = { size: 7 }): TankOptions {
+		return {
+			size: 10,
+			speed: 0.8,
+			bodyFill: '#4b4b4b',            // Dark gray
+			cannonFill: '#2a1e0b',          // Very dark brown
+			wheelTracksFill: '#1b1b1b',     // Almost black
+			wheelTracksStroke: '#000',      // Black
+			id: 'heavy_tank_' + new Date().getTime(),
+			team: 'bad guys',
+			moveMethod: 'findClosestTank',
+			isFiring: true,
+			reloadSpeed: 40,
+			armor: 140,
+			...tankOpts
+		};
+	}
+	
 
-veryLightTank(tankOpts: TankOptions = { size: 5 }): TankOptions {
-    return {
-        size: 5,
-        speed: 2,
-        bodyFill: 'yellow',
-        cannonFill: '#b8640b',
-        wheelTracksFill: 'orange',
-        wheelTracksStroke: '#000',
-        id: 'light_' + new Date().getTime(),
-        team: 'bad guys',
-        moveMethod: 'findClosestTank',
-        isFiring: true,
-        reloadSpeed: 20,
-        armor: 5000,
-        ...tankOpts
-    };
-}
-
-lightTank(tankOpts: TankOptions = { size: 6 }): TankOptions {
-    return {
-        size: 6,
-        speed: 1.8,
-        bodyFill: 'lightgreen',
-        cannonFill: '#7a541b',
-        wheelTracksFill: 'green',
-        wheelTracksStroke: '#333',
-        id: 'light_' + new Date().getTime(),
-        team: 'bad guys',
-        moveMethod: 'defendBase',
-        isFiring: true,
-        reloadSpeed: 25,
-        armor: 7000,
-        ...tankOpts
-    };
-}
-
-mediumTank(tankOpts: TankOptions = { size: 8 }): TankOptions {
-    return {
-        size: 8,
-        speed: 1.2,
-        bodyFill: 'blue',
-        cannonFill: '#3a2b0f',
-        wheelTracksFill: 'navy',
-        wheelTracksStroke: '#111',
-        id: 'medium_' + new Date().getTime(),
-        team: 'bad guys',
-        moveMethod: 'guardArea',
-        isFiring: true,
-        reloadSpeed: 30,
-        armor: 12000,
-        ...tankOpts
-    };
-}
-
-heavyTank(tankOpts: TankOptions = { size: 10 }): TankOptions {
-    return {
-        size: 10,
-        speed: 0.8,
-        bodyFill: 'darkgray',
-        cannonFill: '#2a1e0b',
-        wheelTracksFill: 'black',
-        wheelTracksStroke: '#222',
-        id: 'heavy_' + new Date().getTime(),
-        team: 'bad guys',
-        moveMethod: 'holdPosition',
-        isFiring: true,
-        reloadSpeed: 40,
-        armor: 20000,
-        ...tankOpts
-    };
-}
 
 
 

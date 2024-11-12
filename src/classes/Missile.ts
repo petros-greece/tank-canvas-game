@@ -12,21 +12,26 @@ export class Missile {
     hasExploded: boolean;
     speed: number;
     weight: number;
+    force: number;
     owner: string;
     comp: { halfW?: number; halfH?: number };
   
     constructor(ctx: CanvasRenderingContext2D, options: MissileOptions = {}) {
       this.ctx = ctx;
+
       this.angle = options.angle || 90;
       this.position = options.position || { x: 350, y: 130 };
       this.width = options.width ?? 4;
       this.height = options.height ?? 12;
+      this.speed = options.speed || 16;
+      this.weight = options.weight || 100;
+
+      this.force = this.speed
+
       this.flameToggle = false;
       this.isExploding = false;
       this.explosionRadius = 0;
       this.hasExploded = false;
-      this.speed = 16;
-      this.weight = 100;
       this.owner = options.owner || 'nobody';
       this.comp = {};
       this.init();

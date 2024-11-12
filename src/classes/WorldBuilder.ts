@@ -117,6 +117,7 @@ export class WorldBuilder {
   private applyDisplacementFactor(dx: number, dy: number, sx: number, sy: number): [number, number] {
     return [dx + sx, dy + sy];
   }
+  
   private giveHalfObject(objectOpts: { size?: number; width?: number; height?: number } = {}): { halfWidth: number, halfHeight: number } {
     return {
       halfWidth: (objectOpts.width ?? 0) / 2,
@@ -167,13 +168,13 @@ export class WorldBuilder {
 		const objectOptions = Object.assign({
 			height: 50,
 			width: 30,
-			weight: 1000,
-			isBreakable: true
+			weight: 100,
+			isBreakable: true,
 		}, objectOpts);
 		builderOpts.x = this.transformTypeToPercentage(builderOpts, objectOptions, true);
 
 		const builderOptions = <BuilderOptions>Object.assign({
-			num: 100, dx: -objectOptions.width, dy: 0, type: 'inBounds'
+			num: 100, dx: -objectOptions.width, dy: 1, type: 'inBounds'
 		}, builderOpts)
 
 		return {

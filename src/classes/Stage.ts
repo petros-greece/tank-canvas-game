@@ -7,7 +7,8 @@ import { Missile } from "./Missile";
 import { TankBuilderOptions } from "../interfaces/Interfaces";
 
 export class Stage {
-    private ctx: CanvasRenderingContext2D;
+    public ctx: CanvasRenderingContext2D;
+    public canvas: HTMLCanvasElement;
 
     private stageBuilder: StageBuilder;
     private worldBuilder: WorldBuilder;
@@ -17,10 +18,11 @@ export class Stage {
     public missiles: Missile[] = [];
     public tanks: Tank[] = [];
 		public enemyTanks: Tank[] = [];
-		public stageObjects: GameObject[] = [];
-    public frame: number = 0;
+		public worldObjects: GameObject[] = [];
+    public frame: number = 1;
 
     constructor(canvas: HTMLCanvasElement) {
+        this.canvas = canvas;
         this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         this.stageBuilder = new StageBuilder(canvas);
         this.worldBuilder = new WorldBuilder(canvas);
@@ -33,7 +35,7 @@ export class Stage {
         const objs = this.worldBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
           objs?.forEach((opts) => {
             const gameObject = new GameObject(this.ctx, opts);
-            this.stageObjects.push(gameObject);
+            this.worldObjects.push(gameObject);
           });
         });
     }
@@ -41,9 +43,14 @@ export class Stage {
     giveTanks() {
         const stageOptions  = this.stageBuilder.stage1();
         stageOptions.tankOpts.forEach((tankOpts) => {
-            const tank = new Tank(this.ctx, tankOpts, this);
+            const tank = new Tank(this.canvas, tankOpts, this);
             this.tanks.push(tank);
           });
+    }
+
+    giveTankBuilders(){
+      const stageOptions  = this.stageBuilder.stage1();
+      this.tankBuilders = stageOptions.tankBuilders;
     }
 
 		checkForStageNewEntries(){
@@ -51,10 +58,10 @@ export class Stage {
 				if(!(this.frame % builder.frameInterval) && builder.repetitions > 0){
 					console.log('frame for builder: ' + this.frame)
 					builder.repetitions-=1;
-					const objs = this.tankBuilder[builder.buildMethod](builder.renderMethod);
+					const objs = this.tankBuilder[builder.buildTankMethod](builder.builderOpts, builder.tankOpts);
 					objs?.forEach((opts) => {
-					  const tank = new Tank(this.ctx, opts, this);
-					  this.enemyTanks.push(tank);
+					  const tank = new Tank(this.canvas, opts, this);
+					  this.tanks.push(tank);
 					});
 				}
 			});				
@@ -63,6 +70,7 @@ export class Stage {
 		init(){
 			this.giveObjects();
       this.giveTanks();
+      this.giveTankBuilders();
 		}
 
 

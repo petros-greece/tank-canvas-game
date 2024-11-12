@@ -36,7 +36,7 @@ export class GameObject {
       this.isColliding = false;
       this.isDestroyed = false;
       this.comp = {};
-      this.speed = 1;
+      this.speed = 0;
       this.weight = options.weight || 1000;
       this.angle = options.angle || 0;
       this.armor = 1000;

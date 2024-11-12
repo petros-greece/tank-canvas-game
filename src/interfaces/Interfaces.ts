@@ -8,16 +8,17 @@ export type PublicMethodNames<T> = {
 
 export type RenderTankMethod =   'veryLightTank' | 'lightTank' | 'mediumTank' | 'heavyTank';
 
-export type BuildTankMethod = 'giveTeamOfTanks' | 'giveHorizontalObjectRow';
+export type BuildTankMethod = 'giveTeamOfTanks';
 
 export type RenderObjectMethod = 'giveTeamOfObjects';
 
+export type MoveTankMethod ='moveTo' | 'findClosestTank' | 'render';
 
 export type Direction = "up" | "down" | "left" | "right";
 
 export type TankBuilderOptions = {
     builderOpts:BuilderOptions, 
-    buildMethod: BuildTankMethod, 
+    buildTankMethod: BuildTankMethod, 
     tankOpts: TankOptions, 
     frameInterval: number, 
     repetitions: number
@@ -39,6 +40,8 @@ export interface MissileOptions {
     width?: number;
     height?: number;
     owner?: string;
+    speed?: number;
+    weight?: number;
 }
 
 export interface TankOptions {
@@ -64,7 +67,7 @@ export interface TankOptions {
     explosionRadius?: number;
     explosionFadeOutRadius?: number;
     target?: any;
-    moveMethod?: string;
+    moveMethod?: MoveTankMethod;
     armor?: number;
     isSelected?:boolean;
 }
@@ -102,7 +105,7 @@ export interface StageOptions {
         stageBackground: string;
     };
     worldBuilders:WorldBuilderOptions[]; // Define a more specific type if available
-    tankBuilders?: TankBuilderOptions[]; // Specify a more precise type if possible
+    tankBuilders: TankBuilderOptions[]; // Specify a more precise type if possible
 
     worldObjects?: GameObject[];
     tankOpts: TankOptions[]; // Define a more specific type if available
@@ -154,7 +157,10 @@ export interface GameObject {
 }
 
 export interface Tank {
+    canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
+    cW: number;
+    cH: number;
     team: string;
     id: string;
     game: Game;
@@ -196,6 +202,8 @@ export interface Tank {
     explosionFadeOutRadius: number;
     isDestroyed?: boolean;
     moveMethod?: string;
+
+    inBounds: boolean;
 
     move: () => void;  // Define parameters if move takes any
 }

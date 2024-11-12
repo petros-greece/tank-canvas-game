@@ -5,22 +5,12 @@ import { WorldBuilder } from "./WorldBuilder";
 import { TankBuilder } from "./TankBuilder";
 import { TankOptions, StageOptions, ObjectOptions, BuilderOptions, PublicMethodNames, TankBuilderOptions, WorldBuilderOptions } from "../interfaces/Interfaces";
 import { detectCollision, checkIfClicked }  from "../helpers";
+import { Stage } from "./Stage";
 
-export class Game {
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
+export class Game extends Stage {
+
   team: string;
-  frame: number;
-  tankOpts: TankOptions[];
 
-  tankBuilder: TankBuilder;
-  tankBuilders:  TankBuilderOptions[]; // Specify a more precise type if possible 
-  tanks: Tank[];
-  builder: WorldBuilder;
-  //worldBuilders:  WorldBuilderOptions[]; // Specify a more precise type if possible
-  worldObjects: GameObject[];
-
-  missiles: Missile[];
 
   stage: number;
   score: number;
@@ -40,73 +30,37 @@ export class Game {
   selectedTank: Tank | null;
   interval: any;
 
-  constructor(canvas: HTMLCanvasElement, options: StageOptions) {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  constructor(canvas: HTMLCanvasElement, options: any = {}) {
+    super(canvas);
+
+
     this.team = "Warriors";
-    this.frame = 0;
-    this.tanks = [];
-    this.missiles = [];
-    this.worldObjects = [];
     this.stage = options.stage || 1;
     this.score = options.score || 0;
     this.time = options.time || 0;
+
     this.stats = options.stats || {
       kills: 0,
       hits: 0,
       shotsFired: 0,
       accuracy: 0,
     };
+
     this.settings = options.settings || {
       difficulty: "normal",
       maxMissiles: 10,
       maxTanks: 5,
       stageBackground: "#333",
     };
-    this.builder = new WorldBuilder(canvas);
-    this.tankBuilder = new TankBuilder(canvas);
-    this.tankBuilders = options.tankBuilders || [];
-    //this.worldBuilders = options.worldBuilders || [];
-    this.tankOpts = options.tankOpts || [];
+
     this.selectedTank= null;
     this.interval = null;
 
-    this.init(canvas);
+    this.init();
   }
 
-  init(canvas: HTMLCanvasElement): void {
-    const ctx = this.ctx;
-
-    // this.worldBuilders.forEach((builder) => {
-    //   const objs = this.builder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
-    //   objs?.forEach((opts) => {
-    //     const gameObject = new GameObject(ctx, opts);
-    //     this.worldObjects.push(gameObject);
-    //   });
-    // });
-
-    this.tankOpts.forEach((tankOpts) => {
-      const tank = new Tank(ctx, tankOpts, this);
-      this.tanks.push(tank);
-    });
 
 
-
-  }
-
-  checkForNewWorldEntries(){
-    this.tankBuilders.forEach((builder) => {
-      if(!(this.frame % builder.frameInterval) && builder.repetitions > 0){
-        console.log('frame for builder: ' + this.frame)
-        builder.repetitions-=1;
-        // const objs = this.tankBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
-        // objs?.forEach((opts) => {
-        //   const tank = new Tank(this.ctx, opts, this);
-        //   this.tanks.push(tank);
-        // });
-      }
-    });
-  }
 
 
   run(): void {
@@ -114,13 +68,13 @@ export class Game {
     const ctx = this.ctx;
     const cW = this.canvas.width;
     const cH = this.canvas.height;
-
+    this.checkForStageNewEntries();
     this.interval = setInterval(() => {
       ctx.clearRect(0, 0, cW, cH);
       this.frame += 1;
       if( !(this.frame%100) ){
         console.log('Checking for entries');
-        this.checkForNewWorldEntries();
+        this.checkForStageNewEntries();
       }
      
       //console.log(this);
@@ -132,8 +86,9 @@ export class Game {
         this.missiles.forEach((missile, missileIndex) => {
           if (!tank.isExploding && missile.owner !== tank.team && detectCollision(missile, tank) && !missile.isExploding) {
             missile.isExploding = true;
-            tank.addDamage(10);
+            tank.addDamage(missile.force);
             if(tank.comp.damage >=1 ){
+              //tank.explode();
               console.log('Should be destroyed')
             }
           }

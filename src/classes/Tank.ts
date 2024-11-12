@@ -2,7 +2,11 @@ import { Game, TankOptions, Position, StageI } from "../interfaces/Interfaces";
 import { Missile } from "./Missile";
 
 export class Tank {
+
+	private canvas: HTMLCanvasElement;
 	private ctx: CanvasRenderingContext2D;
+	private cW:number;
+	private cH:number;
 	public team: string;
 	public id: string;
 	private stage: StageI;
@@ -46,10 +50,16 @@ export class Tank {
 	public isDestroyed?: boolean;
 	private moveMethod?: string;
 
+	private inBounds?: boolean;
+
 	public move: Function;
 
-	constructor(ctx: CanvasRenderingContext2D, options: TankOptions, stage: StageI) {
-		this.ctx = ctx;
+	constructor(canvas: HTMLCanvasElement, options: TankOptions, stage: StageI) {
+		this.canvas = canvas;
+		this.cW = canvas.width;
+		this.cH = canvas.height;
+
+		this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		this.team = options.team || '';
 		this.id = options.id || `tank_${new Date().getTime()}`;
 		this.stage = stage;
@@ -73,7 +83,7 @@ export class Tank {
 		this.height = 11 * this.size;
 		this.speed = options.speed ?? 1;
 		this.angle = options.angle ?? 0;
-		this.cannonAngle = options.cannonAngle ?? 0;
+		this.cannonAngle = options.cannonAngle ?? this.angle;
 		this.isFiring = options.isFiring ?? false;
 		this.weight = options.weight || 1000;
 		this.reloadSpeed = options.reloadSpeed ? options.reloadSpeed + Math.floor(Math.random() * 100) : 1000;
@@ -88,6 +98,7 @@ export class Tank {
 		this.isStopped = false;
 		this.canShoot = true;
 		this.isDestroyed = false;
+		this.inBounds = false;
 
 		this.comp = {};
 
@@ -110,13 +121,11 @@ export class Tank {
 		this.draw();
 		if (this.isFiring) {
 			if (this.target && this.target.comp.damage >= 1) {
-
 				//console.log('Target Destroyed!!', this.target.comp.damage)
 				const closestObject = this.getClosestEnemyTank();
 				if (closestObject) {
 					this.updateTarget(closestObject);
 					this.handleMovementTowardsTarget(closestObject);
-					//this.fireMissileTo(ctx);
 				}
 			}
 			else if(!this.target){
@@ -251,12 +260,11 @@ export class Tank {
 
 	private moveOrRotateCannon() {
 		const { dx, dy, distance, targetAngle } = this.calculateTargetPosition();
-
 		const { moveBackward, angleDifference } = this.calculateMovementDirection(targetAngle);
-
 		if (this.needsRotation(angleDifference)) {
 			this.rotateTowardsTarget(angleDifference);
-		} else if (distance > this.speed) {
+		} 
+		else if (distance > this.speed) {
 			this.moveInDirection(distance, moveBackward);
 		}
 	}
@@ -314,6 +322,14 @@ export class Tank {
 		this.frame += 1;
 	}
 
+	private checkIfIsWithinBounds() {
+		this.inBounds = (
+			0 <= this.position.x &&             // Check left boundary
+			this.position.x <= this.cW &&       // Check right boundary
+			0 <= this.position.y &&             // Check top boundary
+			this.position.y <= this.cH          // Check bottom boundary
+		);
+	}
 
 	stop() {
 		this.isStopped = true;
@@ -352,6 +368,7 @@ export class Tank {
 
 	}
 
+	
 	/** DAMAGING ***************************************************************** */
 
 	addDamage(power: number) {
@@ -362,8 +379,6 @@ export class Tank {
 			this.explode();
 			return;
 		}
-
-
 	}
 
 	explode() {
@@ -376,7 +391,7 @@ export class Tank {
 	// Method to render the explosion effect
 	private renderSelfExplosion() {
 		const ctx = this.ctx;
-
+		console.log('rendering self explosion')
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
 		ctx.rotate(this.angle * (Math.PI / 180));
@@ -401,9 +416,9 @@ export class Tank {
 
 		// End the explosion effect once it exceeds the fade-out radius
 		if (this.explosionRadius > this.explosionFadeOutRadius) {
-			this.isExploding = false;  // Stop the explosion
-			this.explosionRadius = 0;  // Reset the explosion radius
 			this.destroy(); // Optional: Handle tank destruction
+			//this.isExploding = false;  // Stop the explosion
+			//this.explosionRadius = 0;  // Reset the explosion radius
 		}
 		ctx.restore();
 	};
@@ -435,21 +450,29 @@ export class Tank {
 	}
 
 	fireMissileTo(ctx: CanvasRenderingContext2D) {
+		const angleDifference = this.calculateCanonAngleDiffFromTheTarget();
+		this.adjustCannonAngle(angleDifference);
+		if(this.canShoot){ this.fireIfIsAlignedWithTarget(angleDifference); }
+		else{this.checkIfCannonCanReload();}
+		//maybe is not neccessary
+		//this.normalizeCannonAngle();
+	}
+
+	private calculateCanonAngleDiffFromTheTarget() : number{
 		const targetAngle = this.calculateTargetAngle();
 		const cannonGlobalAngle = this.calculateCannonGlobalAngle();
-		const angleDifference = this.calculateAngleDifference(targetAngle, cannonGlobalAngle);
+		return this.calculateAngleDifference(targetAngle, cannonGlobalAngle);	
+	}
 
-		this.adjustCannonAngle(angleDifference);
-		if (this.isAlignedWithTarget(angleDifference) && this.canShoot) {
-			this.fireMissile(ctx);
+	private checkIfCannonCanReload(){
+		this.canShoot = Math.min(this.stage.frame % this.reloadSpeed) === 0;
+	}
+
+	private fireIfIsAlignedWithTarget(angleDifference: number) {
+		if ( this.isAlignedWithTarget(angleDifference) ) {
+			this.fireMissile(this.ctx);
 			this.canShoot = false;
-		}
-		if (!this.canShoot) {
-
-			this.canShoot = Math.min(this.stage.frame % this.reloadSpeed) === 0;
-		}
-
-		this.normalizeCannonAngle();
+		}	
 	}
 
 	// Calculate the angle to the target position
@@ -505,16 +528,20 @@ export class Tank {
 	/** AUTOMATION *********************************************/
 
 	findClosestTank() {
+		this.draw();
 		const closestObject = this.getClosestEnemyTank();
-		if (closestObject) {
+		if (closestObject){		
 			this.updateTarget(closestObject);
 			this.handleMovementTowardsTarget(closestObject);
+			this.checkIfIsWithinBounds();
+			if(this.inBounds){ this.fireMissileTo(this.ctx); }
+			if (this.isExploding) this.renderSelfExplosion();
 		}
-		this.render();
+		
 	}
 
 	// Finds and returns the closest enemy tank
-	private getClosestEnemyTank(): any | null {
+	private getClosestEnemyTank(): Tank | null {
 		let closestObject: any = null;
 		let minDistance = Infinity;
 
@@ -556,7 +583,6 @@ export class Tank {
 			this.moveOrRotateCannon();
 		}
 	}
-
 
 	checkIfObstaclesInTheWay() {
 
