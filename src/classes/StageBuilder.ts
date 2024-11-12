@@ -19,15 +19,16 @@ export class StageBuilder {
 	stage1(): StageOptions {
 		return {
 			worldBuilders: [
-				this.worldbuilder.giveVerticalObjectRow( { divider: 2 }, { width: 50, height: 50 },),
-				//this.worldbuilder.giveVerticalObjectRow( {}, { width: 50, height: 50 },),
+				this.worldbuilder.giveVerticalObjectRow( { divider: 2, y: this.cH/2, dy: -150 }, { width: 50, height: 50, weight: 100001 },),
+				this.worldbuilder.giveVerticalObjectRow( { divider: 3, y: this.cH/2, dy: 50 }, { width: 50, height: 50 },),			
+				//this.worldbuilder.giveVerticalObjectRow( { divider: 3 }, { width: 50, height: 50 },),
 				//this.worldbuilder.giveHorizontalObjectRow( { divider: 2 }, { width: 50, height: 50 },),
 			],
 			tankBuilders: [
 				this.tankBuilder.giveTanksFromTheRight('veryLightTank', 1, 1 ),
-				//this.tankBuilder.giveTanksFromTheRight('lightTank', 1),
-				//this.tankBuilder.giveTanksFromTheRight('mediumTank', 1),
-				//this.tankBuilder.giveTanksFromTheRight('heavyTank', 1),
+				this.tankBuilder.giveTanksFromTheRight('lightTank', 2000),
+				//this.tankBuilder.giveTanksFromTheRight('mediumTank', 4000),
+				//this.tankBuilder.giveTanksFromTheRight('heavyTank', 6000),
 
 			],
 			tankOpts: [
@@ -42,7 +43,7 @@ export class StageBuilder {
 					team: 'Warriors',
 					moveMethod: 'moveTo',
 					isFiring: true,
-					reloadSpeed: 4,
+					reloadSpeed: 20,
 					armor: 5000,					
 				}
 			]

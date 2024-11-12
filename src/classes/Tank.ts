@@ -129,7 +129,7 @@ export class Tank {
 				}
 			}
 			else if(!this.target){
-				console.log('Updating Target!!')
+				//console.log('Updating Target!!')
 				const closestObject = this.getClosestEnemyTank();
 				if (closestObject) {
 					this.updateTarget(closestObject);
@@ -375,7 +375,7 @@ export class Tank {
 		this.damage += power;
 		this.comp.damage = Math.min(this.damage / this.armor, 1);
 		if (this.comp.damage >= 1) {
-			console.log('Tank exploiding', this);
+			//console.log('Tank exploiding', this);
 			this.explode();
 			return;
 		}
@@ -391,7 +391,7 @@ export class Tank {
 	// Method to render the explosion effect
 	private renderSelfExplosion() {
 		const ctx = this.ctx;
-		console.log('rendering self explosion')
+		//console.log('rendering self explosion')
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
 		ctx.rotate(this.angle * (Math.PI / 180));
@@ -424,7 +424,7 @@ export class Tank {
 	};
 
 	destroy() {
-		console.log('Tank destroyed', this)
+		//console.log('Tank destroyed', this)
 		this.isDestroyed = true; // Flag to destroy the tank
 	};
 

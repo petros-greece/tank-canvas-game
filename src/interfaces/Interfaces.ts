@@ -134,6 +134,7 @@ export interface Game {
 export interface StageI {
     frame: number;
     tanks: any[];
+    worldObjects: any[];
     addMissile: (missile: Missile) => void;
 }
 
