@@ -2,6 +2,7 @@
 import { ObjectOptions, Position } from "../interfaces/Interfaces";
 
 export class GameObject {
+    
     ctx: CanvasRenderingContext2D;
     position: Position;
     moveToPos: Position;
@@ -53,20 +54,19 @@ export class GameObject {
       this.position = this.position ? this.position : { x: this.comp.halfW, y: this.comp.halfH };
     }
   
-    renderBody(): void {
+    private renderBody(): void {
       if (this.isColliding) {
         this.moveTo();
       }
       this.drawBody();
     }
 
-    renderBreakable(): void {
+    private renderBreakable(): void {
       if (this.isColliding) {
         this.moveTo();
       }   
       this.drawBreakableBody();
     }
-
 
     private drawBody(){
       this.ctx.save();
@@ -91,20 +91,21 @@ export class GameObject {
       this.ctx.restore();     
     }
 
-  
-    getHit(thing: any): void {
+    getHit(missile: any): void {
       this.isColliding = true;
-      const impactForce = (thing.speed * thing.weight) / (this.weight + thing.weight);
-      const combinedAngle = thing.angle;
+      const impactForce = (missile.speed * missile.weight) / (this.weight + missile.weight);
+      const combinedAngle = missile.angle;
       const combinedAngleRadians = (combinedAngle * Math.PI) / 180;
-      const moveX = Math.cos(combinedAngleRadians) * impactForce * 10;
-      const moveY = Math.sin(combinedAngleRadians) * impactForce * 10;
+      const moveX = Math.cos(combinedAngleRadians) * impactForce * 2;
+      const moveY = Math.sin(combinedAngleRadians) * impactForce * 2;
       this.addDamage(100);
-      this.moveToPos = {
-        x: this.position.x + moveX,
-        y: this.position.y + moveY,
-      };
-      this.moveToAngle = combinedAngle;
+      if(this.weight < 10000){
+        this.moveToPos = {
+          x: this.position.x + moveX,
+          y: this.position.y + moveY,
+        };
+        this.moveToAngle = combinedAngle;
+      }
     }
 
     addDamage(damage: number){
@@ -154,6 +155,9 @@ export class GameObject {
       obj.position.x -= Math.cos(collisionAngle) * (this.weight / 1000);
       obj.position.y -= Math.sin(collisionAngle) * (this.weight / 1000);
     }
+
+
+
 
   }
 
