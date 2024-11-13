@@ -28,12 +28,12 @@ export class GameObject {
       this.width = options.width || 30;
       this.height = options.height || 30;
       this.position = options.position || { x: 0, y: 0 };
-      this.moveToPos = options.moveToPos || { ...this.position };
       this.color = options.color || "#4CAF50";
       this.isBreakable = options.isBreakable || false;
       this.id = options.id || `Object_${new Date().getTime()}`;
       this.team = options.team || "Warriors";
 
+      this.moveToPos = options.moveToPos || { ...this.position };
       this.isColliding = false;
       this.isDestroyed = false;
       this.comp = {};

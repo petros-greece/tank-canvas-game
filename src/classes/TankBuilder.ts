@@ -79,7 +79,7 @@ export class TankBuilder {
 		let angle = tankOpts.angle ?? 0;
 
 
-		console.log( positionX, positionY);
+		//console.log( positionX, positionY);
 		for (let i = 0; i < num; i++) {
 			const obj = this.createTank(i, tankOpts, positionX, positionY, angle);
 			console.log('create tank position', positionX, positionY);
