@@ -1,0 +1,25 @@
+[
+	{
+		"worldBuilders": [
+			{
+				"method": "giveVerticalObjectRow",
+				"builderOpts": { "dividerX": 10, "dividerY": 1, "materialType": "lgLight"},
+				"objectOpts": {}
+			}
+		
+
+		],
+		"tankBuilders": [
+			{
+				"method": "giveTanksFromTheRight",
+				"tankType": "veryLightTank",
+				"frameInterval": 1,
+				"repititions": 2,
+				"builderOpts": {
+					"type": "sequence",
+					"num": 9
+				}
+			}
+		]
+	}
+]

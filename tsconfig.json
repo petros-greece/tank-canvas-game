@@ -12,6 +12,7 @@
   "moduleResolution": "node",
   "outDir": "./dist",
   "esModuleInterop": true,
-  "strict": true
+  "strict": true,
+  "resolveJsonModule": true,
   }
 }
