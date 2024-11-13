@@ -66,6 +66,7 @@ export class Game extends Stage {
     const cW = this.canvas.width;
     const cH = this.canvas.height;
     this.checkForStageNewEntries();
+    
     this.interval = setInterval(() => {
       ctx.clearRect(0, 0, cW, cH);
       this.frame += 1;
@@ -78,6 +79,12 @@ export class Game extends Stage {
       this.tanks.forEach((tank, index) => {
         if (tank.isDestroyed) {
           this.tanks.splice(index, 1);
+          if( this.checkForVictory(this.team) ){
+            alert('You re the greatest');
+          }
+          // else if( this.checkForDefeat(this.team) ) {
+          //   alert('You re the worst');
+          // }
         }
 
         this.missiles.forEach((missile, missileIndex) => {
@@ -85,9 +92,7 @@ export class Game extends Stage {
             missile.isExploding = true;
             tank.addDamage(missile.force);
             if(tank.comp.damage >=1 ){
-              if( this.checkForVictory(this.team) ){
-                alert('You re the greatest');
-              }
+             
             }
           }
         });
