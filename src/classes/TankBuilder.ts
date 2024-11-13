@@ -70,7 +70,7 @@ export class TankBuilder {
 		return position;
 	}
 
-	giveTeamOfTanks(builderOpts: BuilderOptions, tankOpts: TankOptions): TankOptions[] {
+	private giveTeamOfTanks(builderOpts: BuilderOptions, tankOpts: TankOptions): TankOptions[] {
 		const objects: TankOptions[] = [];
 		let { dx, dy, sx, sy, sa } = this.giveBuilderDefaults(builderOpts, tankOpts);
 		let num = builderOpts.num || 1;
@@ -109,8 +109,7 @@ export class TankBuilder {
 			buildTankMethod: 'giveTeamOfTanks',
 			builderOpts: { 
 				dir: 'right', 
-				y: tanksNum === 1 ? Math.round(this.cH/2) : 0, 
-				x: builderOpts?.x || 500, 
+				y: tanksNum === 1 ? Math.round(this.cH/2) : 0,  
 				dy: dy,
 				dx: -tankSize * 14,
 				num: tanksNum, 
@@ -125,7 +124,7 @@ export class TankBuilder {
 
 	/** TANK TYPES ********************************************************************************* */
 
-	veryLightTank(tankOpts: TankOptions = { size: 4 }): TankOptions {
+	private veryLightTank(tankOpts: TankOptions = { size: 4 }): TankOptions {
 		return {
 			size: 4,
 			speed: 2,
@@ -143,7 +142,7 @@ export class TankBuilder {
 		};
 	}
 	
-	lightTank(tankOpts: TankOptions = { size: 5 }): TankOptions {
+	private lightTank(tankOpts: TankOptions = { size: 5 }): TankOptions {
 		return {
 			size: 5,
 			speed: 1.8,
@@ -161,7 +160,7 @@ export class TankBuilder {
 		};
 	}
 	
-	mediumTank(tankOpts: TankOptions = { size: 6 }): TankOptions {
+	private mediumTank(tankOpts: TankOptions = { size: 6 }): TankOptions {
 		return {
 			size: 8,
 			speed: 1.2,
@@ -179,7 +178,7 @@ export class TankBuilder {
 		};
 	}
 	
-	heavyTank(tankOpts: TankOptions = { size: 7 }): TankOptions {
+	private heavyTank(tankOpts: TankOptions = { size: 7 }): TankOptions {
 		return {
 			size: 10,
 			speed: 0.8,

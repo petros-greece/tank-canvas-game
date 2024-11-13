@@ -1,4 +1,4 @@
-import { BuilderOptions, ObjectOptions, WorldBuilderOptions } from '../interfaces/Interfaces';
+import { BuilderOptions, ObjectOptions, Position, WorldBuilderOptions } from '../interfaces/Interfaces';
 
 export class WorldBuilder {
   private cW: number;
@@ -72,8 +72,8 @@ export class WorldBuilder {
     let num = builderOpts.num || 1;
 
 
-    let positionX = builderOpts?.x ?? objectOpts.width/2;
-    let positionY = builderOpts?.y ?? objectOpts.height/2;
+    let positionX = builderOpts?.x ?? objectOpts.width / 2;
+    let positionY = builderOpts?.y ?? objectOpts.height / 2;
     let angle = objectOpts.angle ?? 0;
     let outOfBounds = true;
 
@@ -117,7 +117,7 @@ export class WorldBuilder {
   private applyDisplacementFactor(dx: number, dy: number, sx: number, sy: number): [number, number] {
     return [dx + sx, dy + sy];
   }
-  
+
   private giveHalfObject(objectOpts: { size?: number; width?: number; height?: number } = {}): { halfWidth: number, halfHeight: number } {
     return {
       halfWidth: (objectOpts.width ?? 0) / 2,
@@ -157,50 +157,143 @@ export class WorldBuilder {
   /******************************************************************************************************************************************/
 
 
-  private transformTypeToPercentage(builderOpts: BuilderOptions, objectOpts: ObjectOptions, toWidth:boolean) : number {
-		if( builderOpts.divider ){
-			return builderOpts.divider ? (toWidth ? this.cW : this.cH) / builderOpts.divider : 0;
-		}
-		return  (toWidth ? objectOpts.position?.x : objectOpts.position?.y )?? 0;
-	}
+  private transformTypeToPercentage(builderOpts: BuilderOptions, objectOpts: ObjectOptions): Position {
+    return {
+      x: builderOpts.dividerX ? this.cW - (this.cW / builderOpts.dividerX)  : objectOpts.width / 2,
+      y: builderOpts.dividerY ? this.cH - (this.cH / builderOpts.dividerY) : objectOpts.height / 2,
+    }
+  }
 
-	giveVerticalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions, ) : WorldBuilderOptions {
-		const objectOptions = Object.assign({
-			height: 50,
-			width: 30,
-			weight: 100,
-			isBreakable: true,
-		}, objectOpts);
-		builderOpts.x = this.transformTypeToPercentage(builderOpts, objectOptions, true);
+  giveVerticalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions,): WorldBuilderOptions {
+    const method = builderOpts.materialType ? builderOpts.materialType : 'smLight'
+    const objectOptions = Object.assign(this[method], objectOpts);
+    const startPos = this.transformTypeToPercentage(builderOpts, objectOptions);
+    builderOpts.x = startPos.x;
+    builderOpts.y = startPos.y;
 
-		const builderOptions = <BuilderOptions>Object.assign({
-			num: 100, dx: -objectOptions.width, dy: 1, type: 'inBounds'
-		}, builderOpts)
+    const builderOptions = <BuilderOptions>Object.assign({
+      num: 100, dx: -objectOptions.width, dy: 1, type: 'inBounds'
+    }, builderOpts)
 
-		return {
-			buildMethod: 'giveTeamOfObjects',
-			builderOpts: <BuilderOptions>builderOptions,
-			objectOpts: objectOptions
-		};
-	}
+    return {
+      buildMethod: 'giveTeamOfObjects',
+      builderOpts: <BuilderOptions>builderOptions,
+      objectOpts: objectOptions
+    };
+  }
 
-	giveHorizontalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions) : WorldBuilderOptions {
-		const objectOptions = Object.assign({
-			height: 50,
-			width: 30,
-			weight: 1000,
-			isBreakable: true
-		}, objectOpts);
-		builderOpts.y = this.transformTypeToPercentage(builderOpts, objectOptions, false);
-		const builderOptions = <BuilderOptions>Object.assign({
-			num: 100, dy: -objectOptions.height, dx: 0, type: 'inBounds'
-		}, builderOpts)
-		return {
-			buildMethod: 'giveTeamOfObjects',
-			builderOpts: <BuilderOptions>builderOptions,
-			objectOpts: objectOptions
-		};
-	}
+  giveHorizontalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions): WorldBuilderOptions {
+
+    const method = builderOpts.materialType ? builderOpts.materialType : 'smLight'
+    const objectOptions = Object.assign(this[method], objectOpts);
+    const startPos = this.transformTypeToPercentage(builderOpts, objectOptions);
+    builderOpts.x = startPos.x;
+    builderOpts.y = startPos.y;
+
+    const builderOptions = <BuilderOptions>Object.assign({
+      num: 100, dy: -objectOptions.height, dx: 0, type: 'inBounds'
+    }, builderOpts)
+    return {
+      buildMethod: 'giveTeamOfObjects',
+      builderOpts: <BuilderOptions>builderOptions,
+      objectOpts: objectOptions
+    };
+  }
+
+  /************************************************************************************************************************************
+   * 
+   */
+
+
+  private get smLight(): ObjectOptions {
+    return {
+      height: this.cW / 40,
+      width: this.cW / 40,
+      weight: 250,
+      isBreakable: true,
+      color: '#25f57b'
+    }
+  }
+
+  private get smMedium(): ObjectOptions {
+    return {
+      height: this.cW / 40,
+      width: this.cW / 40,
+      weight: 500,
+      isBreakable: true,
+      color: '#25f57b'
+    }
+  }
+
+  private get smHeavy(): ObjectOptions {
+    return {
+      height: this.cW / 40,
+      width: this.cW / 40,
+      weight: 1000,
+      isBreakable: false,
+      color: '#25f57b'
+    }
+  }
+
+  private get mdLight(): ObjectOptions {
+    return {
+      height: this.cW / 30,
+      width: this.cW / 30,
+      weight: 500,
+      isBreakable: true,
+      color: '#4bcf83'
+    }
+  }
+
+  private get mdMedium(): ObjectOptions {
+    return {
+      height: this.cW / 30,
+      width: this.cW / 30,
+      weight: 1000,
+      isBreakable: true,
+      color: '#4bcf83'
+    }
+  }
+
+  private get mdHeavy(): ObjectOptions {
+    return {
+      height: this.cW / 30,
+      width: this.cW / 30,
+      weight: 2000,
+      isBreakable: false,
+      color: '#4bcf83'
+    }
+  }
+
+  private get lgLight(): ObjectOptions {
+    return {
+      height: this.cW / 20,
+      width: this.cW / 20,
+      weight: 1000,
+      isBreakable: true,
+      color: '#18a558'
+    }
+  }
+
+  private get lgMedium(): ObjectOptions {
+    return {
+      height: this.cW / 20,
+      width: this.cW / 20,
+      weight: 2000,
+      isBreakable: false,
+      color: '#18a558'
+    }
+  }
+
+  private get lgHeavy(): ObjectOptions {
+    return {
+      height: this.cW / 20,
+      width: this.cW / 20,
+      weight: 4000,
+      isBreakable: false,
+      color: '#18a558'
+    }
+  }
 
 
 }
