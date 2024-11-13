@@ -3,6 +3,11 @@ import { BuilderOptions, ObjectOptions, Position, WorldBuilderOptions } from '..
 export class WorldBuilder {
   private cW: number;
   private cH: number;
+  private colors = {
+    light: '#25f57b',
+    medium: '#99742b',
+    heavy: 'rgb(55,55,55)'
+  };
 
   constructor(canvas: HTMLCanvasElement) {
     this.cW = canvas.width;
@@ -11,13 +16,20 @@ export class WorldBuilder {
 
 
   private giveObjectDefaults(builderOpts: BuilderOptions, objectOpts: ObjectOptions): { dx: number, dy: number, sx: number, sy: number, sa: number } {
-    return {
+    let defaults = {
       dx: builderOpts.dx ? builderOpts.dx + objectOpts.width : objectOpts.width,
       dy: builderOpts.dy ? builderOpts.dy + objectOpts.height : objectOpts.height,
       sx: builderOpts.sx || 0,
       sy: builderOpts.sy || 0,
       sa: builderOpts.sa || 0
     }
+    if (builderOpts.dir === 'up') {
+      defaults.dy = -defaults.dy;
+		} 
+    else if (builderOpts.dir === 'left') {
+      defaults.dx = -defaults.dx;
+		} 
+    return defaults;
   }
 
   protected giveSequenceOfObjects(builderOpts: BuilderOptions, objectOpts: ObjectOptions): ObjectOptions[] {
@@ -64,10 +76,13 @@ export class WorldBuilder {
     return { positionX, positionY, angle };
   }
 
+
+
   /*********************************************************************** */
 
   protected giveTeamOfObjects(builderOpts: BuilderOptions, objectOpts: ObjectOptions): ObjectOptions[] {
     const objects: ObjectOptions[] = [];
+    console.log('opts',objectOpts);
     let { dx, dy, sx, sy, sa } = this.giveObjectDefaults(builderOpts, objectOpts);
     let num = builderOpts.num || 1;
 
@@ -89,7 +104,7 @@ export class WorldBuilder {
 
       [positionX, positionY, outOfBounds] = this.adjustPositionWithinBounds(positionX, positionY, dx, dy, objectOpts);
 
-      if (outOfBounds && builderOpts?.type === 'inBounds') {
+      if ( (outOfBounds && builderOpts?.type === 'inBounds') ) {
         break;
       }
       angle += sa;
@@ -157,22 +172,22 @@ export class WorldBuilder {
   /******************************************************************************************************************************************/
 
 
-  private transformTypeToPercentage(builderOpts: BuilderOptions, objectOpts: ObjectOptions): Position {
+  private checkConfigDividers(builderOpts: BuilderOptions, objectOpts: ObjectOptions): Position {
     return {
-      x: builderOpts.dividerX ? this.cW - (this.cW / builderOpts.dividerX)  : objectOpts.width / 2,
+      x: builderOpts.dividerX ? this.cW - (this.cW / builderOpts.dividerX) : objectOpts.width  / 2,
       y: builderOpts.dividerY ? this.cH - (this.cH / builderOpts.dividerY) : objectOpts.height / 2,
     }
   }
 
-  giveVerticalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions,): WorldBuilderOptions {
+  giveVerticalObjectRow(builderOpts: BuilderOptions, objectOpts: ObjectOptions): WorldBuilderOptions {
     const method = builderOpts.materialType ? builderOpts.materialType : 'smLight'
     const objectOptions = Object.assign(this[method], objectOpts);
-    const startPos = this.transformTypeToPercentage(builderOpts, objectOptions);
+    const startPos = this.checkConfigDividers(builderOpts, objectOptions);
     builderOpts.x = startPos.x;
     builderOpts.y = startPos.y;
 
     const builderOptions = <BuilderOptions>Object.assign({
-      num: 100, dx: -objectOptions.width, dy: 1, type: 'inBounds'
+      num: 100, dx: -objectOptions.width, type: 'inBounds'
     }, builderOpts)
 
     return {
@@ -186,13 +201,14 @@ export class WorldBuilder {
 
     const method = builderOpts.materialType ? builderOpts.materialType : 'smLight'
     const objectOptions = Object.assign(this[method], objectOpts);
-    const startPos = this.transformTypeToPercentage(builderOpts, objectOptions);
+    const startPos = this.checkConfigDividers(builderOpts, objectOptions);
     builderOpts.x = startPos.x;
     builderOpts.y = startPos.y;
 
     const builderOptions = <BuilderOptions>Object.assign({
-      num: 100, dy: -objectOptions.height, dx: 0, type: 'inBounds'
+      num: 100, dy: -objectOptions.height, type: 'inBounds'
     }, builderOpts)
+
     return {
       buildMethod: 'giveTeamOfObjects',
       builderOpts: <BuilderOptions>builderOptions,
@@ -211,7 +227,7 @@ export class WorldBuilder {
       width: this.cW / 40,
       weight: 250,
       isBreakable: true,
-      color: '#25f57b'
+      color: this.colors.light
     }
   }
 
@@ -221,7 +237,7 @@ export class WorldBuilder {
       width: this.cW / 40,
       weight: 500,
       isBreakable: true,
-      color: '#25f57b'
+      color: this.colors.medium
     }
   }
 
@@ -231,7 +247,7 @@ export class WorldBuilder {
       width: this.cW / 40,
       weight: 1000,
       isBreakable: false,
-      color: '#25f57b'
+      color: this.colors.heavy
     }
   }
 
@@ -241,7 +257,7 @@ export class WorldBuilder {
       width: this.cW / 30,
       weight: 500,
       isBreakable: true,
-      color: '#4bcf83'
+      color: this.colors.light
     }
   }
 
@@ -251,7 +267,7 @@ export class WorldBuilder {
       width: this.cW / 30,
       weight: 1000,
       isBreakable: true,
-      color: '#4bcf83'
+      color: this.colors.medium
     }
   }
 
@@ -261,7 +277,7 @@ export class WorldBuilder {
       width: this.cW / 30,
       weight: 2000,
       isBreakable: false,
-      color: '#4bcf83'
+      color: this.colors.heavy
     }
   }
 
@@ -271,7 +287,7 @@ export class WorldBuilder {
       width: this.cW / 20,
       weight: 1000,
       isBreakable: true,
-      color: '#18a558'
+      color: this.colors.light
     }
   }
 
@@ -281,7 +297,7 @@ export class WorldBuilder {
       width: this.cW / 20,
       weight: 2000,
       isBreakable: false,
-      color: '#18a558'
+      color: this.colors.medium
     }
   }
 
@@ -289,9 +305,9 @@ export class WorldBuilder {
     return {
       height: this.cW / 20,
       width: this.cW / 20,
-      weight: 4000,
+      weight: 10000,
       isBreakable: false,
-      color: '#18a558'
+      color: this.colors.heavy
     }
   }
 
