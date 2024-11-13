@@ -38,7 +38,7 @@ export class Stage {
   }
 
   checkForDefeat(myTeam: string) {
-    return (this.tanks.filter(tank => tank.team !== myTeam)).length === 0;
+    return (this.tanks.filter(tank => tank.team === myTeam)).length === 0;
   }
 
   checkForStageNewEntries() {
@@ -65,8 +65,6 @@ export class Stage {
 
   }
 
-
-
   private get areEnemiesOnStage(): boolean {
     return (this.tanks.filter(tank => tank.team !== 'Warriors')).length !== 0;
   }
@@ -82,6 +80,7 @@ export class Stage {
   /** INITIALAZATION ******************************************************************************** */
 
   giveObjects(stageOptions: StageOptions) {
+    console.log(stageOptions.worldBuilders)
     stageOptions.worldBuilders.forEach((builder) => {
       const objs = this.worldBuilder[builder.buildMethod](builder.builderOpts, builder.objectOpts);
       objs?.forEach((opts) => {
@@ -108,7 +107,6 @@ export class Stage {
     this.giveTanks(stageOptions);
     this.giveTankBuilders(stageOptions);
   }
-
 
   /********************************************************************************** */
 

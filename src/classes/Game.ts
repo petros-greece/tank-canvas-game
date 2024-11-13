@@ -82,9 +82,9 @@ export class Game extends Stage {
           if( this.checkForVictory(this.team) ){
             alert('You re the greatest');
           }
-          // else if( this.checkForDefeat(this.team) ) {
-          //   alert('You re the worst');
-          // }
+          else if( this.checkForDefeat(this.team) ) {
+            alert('You re the worst');
+          }
         }
 
         this.missiles.forEach((missile, missileIndex) => {
