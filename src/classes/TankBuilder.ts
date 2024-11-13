@@ -42,12 +42,15 @@ export class TankBuilder {
 	}
 
 	private decideStartPosition(builderOpts: BuilderOptions, tankOpts: TankOptions): { x: number; y: number } {
-		let position = { x: 0, y: 0 };
+		let position = { 
+			x: 0, 
+			y: 0 
+		};
 
 		// Check if x and y positions are defined in tankOpts.position
 		const hasX = builderOpts?.x !== undefined && builderOpts.x > -1;
 		const hasY = builderOpts?.y !== undefined && builderOpts.y > -1;
-		//console.log(hasX, hasY)
+		//console.log(hasX, hasY, builderOpts.x)
 
 		// Set the starting position based on the direction specified in builderOpts
 		if (builderOpts.dir === 'down') {
@@ -58,10 +61,10 @@ export class TankBuilder {
 			position.x = hasX ? Number(builderOpts.x) : this.cW / 2 - (tankOpts.size || 0) * 7;
 		} else if (builderOpts.dir === 'left') {
 			position.x = -(tankOpts.size || 0) * 14; // Position to the left of canvas
-			position.y = hasY ? Number(builderOpts!.y) : this.cH / 2 - (tankOpts.size || 0) * 7;
+			position.y = hasY ? Number(builderOpts.y) : this.cH / 2 - (tankOpts.size || 0) * 7;
 		} else if (builderOpts.dir === 'right') {
 			position.x = this.cW + (tankOpts.size || 0) * 14; // Position to the right of canvas
-			position.y = hasY ? Number(builderOpts!.y) : this.cH / 2 - (tankOpts.size || 0) * 7;
+			position.y = hasY ? Number(builderOpts.y) : this.cH / 2 - (tankOpts.size || 0) * 7;
 		}
 
 		return position;
@@ -75,9 +78,11 @@ export class TankBuilder {
 		let { x: positionX, y: positionY } = this.decideStartPosition(builderOpts, tankOpts);
 		let angle = tankOpts.angle ?? 0;
 
+
+		console.log( positionX, positionY);
 		for (let i = 0; i < num; i++) {
 			const obj = this.createTank(i, tankOpts, positionX, positionY, angle);
-			//console.log(positionX, positionY);
+			console.log('create tank position', positionX, positionY);
 			objects.push(obj);
 
 			const [newPositionX, newPositionY] = this.calculateNewPosition(dx, dy, angle, positionX, positionY);
@@ -99,13 +104,13 @@ export class TankBuilder {
 		const tanksNum: number = builderOpts?.num || 2;
 		const tankSize: number = tankOpts?.size || 5;
 		const dy = (tanksNum !== 1) ?  Math.round( this.cH / (tanksNum -1 )) : this.cH/2
-	
+
 		return {
 			buildTankMethod: 'giveTeamOfTanks',
 			builderOpts: { 
 				dir: 'right', 
-				y: 0, 
-				x: 0,
+				y: tanksNum === 1 ? Math.round(this.cH/2) : 0, 
+				x: builderOpts?.x || 500, 
 				dy: dy,
 				dx: -tankSize * 14,
 				num: tanksNum, 
@@ -118,7 +123,7 @@ export class TankBuilder {
 		}
 	}
 
-	/*********************************************************************************** */
+	/** TANK TYPES ********************************************************************************* */
 
 	veryLightTank(tankOpts: TankOptions = { size: 4 }): TankOptions {
 		return {
