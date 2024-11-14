@@ -43,7 +43,7 @@ export class Stage {
 
   checkForStageNewEntries() {
     let builder = this.tankBuilders[this.currentTankBuilder];
-    
+    console.log(!this.areEnemiesOnStage, builder.builderOpts.type === 'sequence', builder.repetitions > 0);
     //check if tanks marked as sequence and if there are no enemies left
     if ( !this.areEnemiesOnStage && builder.builderOpts.type === 'sequence' && builder.repetitions > 0) {
       builder.repetitions -= 1;

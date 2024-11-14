@@ -149,4 +149,13 @@ function log(msg: string): void {
   
     return closestObject;
   }
+
+  export function calculateAngle(point1: Position, point2: Position) {
+    const dx = point2.x - point1.x; // Difference in x
+    const dy = point2.y - point1.y; // Difference in y
+    const angleRadians = Math.atan2(dy, dx); // Angle in radians
+    const angleDegrees = angleRadians * (180 / Math.PI); // Convert to degrees if needed
+    return angleDegrees; // Return angle in degrees
+  }
+
   

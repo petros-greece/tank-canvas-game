@@ -1,23 +1,21 @@
 [
 	{
-		"worldBuilders": [
-			{
-				"method": "giveVerticalObjectRow",
-				"builderOpts": { "dividerX": 10, "dividerY": 1, "materialType": "lgLight"},
-				"objectOpts": {}
-			}
-		
-
+		"worldBuilders": [{
+			"method": "giveVerticalObjectRow",
+			"builderOpts": { "dividerX": 10, "dividerY": 1, "materialType": "lgLight"},
+			"objectOpts": {}
+		}
 		],
 		"tankBuilders": [
 			{
-				"method": "giveTanksFromTheRight",
-				"tankType": "veryLightTank",
-				"frameInterval": 1,
-				"repititions": 2,
+				"method": "giveTanksFromTheSide",
+				"tankType": "heavyTank",
+				"frameInterval": 0,
+				"repetitions": 3,
 				"builderOpts": {
 					"type": "sequence",
-					"num": 9
+					"num": 5,
+					"dir": "down"
 				}
 			}
 		]

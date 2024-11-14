@@ -65,13 +65,13 @@ export class Game extends Stage {
     const ctx = this.ctx;
     const cW = this.canvas.width;
     const cH = this.canvas.height;
-    this.checkForStageNewEntries();
+    //this.checkForStageNewEntries();
     
     this.interval = setInterval(() => {
       ctx.clearRect(0, 0, cW, cH);
       this.frame += 1;
       if( !(this.frame%100) ){
-        console.log('Checking for entries');
+        //console.log('Checking for entries');
         this.checkForStageNewEntries();
       }
      

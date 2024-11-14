@@ -25,9 +25,9 @@ export class StageBuilder {
 
 	giveMyStageTeam():TankOptions[] {
 		return  [{
-			position: { x: 200, y: this.cH/2 },
-			moveToPos: { x: 200, y: 365 },
-			size: 8,
+			position: { x: this.cW/2, y: this.cH/2 },
+			moveToPos: { x: this.cW/2, y: this.cH/2 },
+			size: 6,
 			speed: 1,
 			cannonAngle: 0,
 			bodyFill: '#fff',
@@ -35,8 +35,8 @@ export class StageBuilder {
 			team: 'Warriors',
 			moveMethod: 'moveTo',
 			isFiring: true,
-			reloadSpeed: 20,
-			armor: 1500,					
+			reloadSpeed: 10,
+			armor: 15500,					
 		}];
 	}
 	
@@ -78,13 +78,13 @@ export class StageBuilder {
 		// 	],
 
 			// tankBuilders: [
-			// 	this.tankBuilder.giveTanksFromTheRight('veryLightTank', 0, 2, {type:'sequence', num: 2 } ),
-      //           //this.tankBuilder.giveTanksFromTheRight('veryLightTank', 0, 2, {type:'sequence', num: 3} ),
-			// 	// this.tankBuilder.giveTanksFromTheRight('veryLightTank', 1, 2, {type: 'sequence', num: 1} ),
-			// 	// this.tankBuilder.giveTanksFromTheRight('veryLightTank', 0, 2, {type: 'sequence', num: 3} ),
-			// 	// this.tankBuilder.giveTanksFromTheRight('lightTank', 0, 2, {type: 'sequence'}),
-			// 	// this.tankBuilder.giveTanksFromTheRight('mediumTank', 0, 2, {type: 'sequence', y: this.cW/3}),
-			// 	// //this.tankBuilder.giveTanksFromTheRight('heavyTank', 6000),
+			// 	this.tankBuilder.giveTanksFromTheSide('veryLightTank', 0, 2, {type:'sequence', num: 2 } ),
+      //           //this.tankBuilder.giveTanksFromTheSide('veryLightTank', 0, 2, {type:'sequence', num: 3} ),
+			// 	// this.tankBuilder.giveTanksFromTheSide('veryLightTank', 1, 2, {type: 'sequence', num: 1} ),
+			// 	// this.tankBuilder.giveTanksFromTheSide('veryLightTank', 0, 2, {type: 'sequence', num: 3} ),
+			// 	// this.tankBuilder.giveTanksFromTheSide('lightTank', 0, 2, {type: 'sequence'}),
+			// 	// this.tankBuilder.giveTanksFromTheSide('mediumTank', 0, 2, {type: 'sequence', y: this.cW/3}),
+			// 	// //this.tankBuilder.giveTanksFromTheSide('heavyTank', 6000),
 
 			// ],
 			// tankOpts: this.giveMyStageTeam()			

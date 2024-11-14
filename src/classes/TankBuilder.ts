@@ -1,4 +1,5 @@
-import { BuilderOptions, TankOptions, Tank, TankBuilderOptions, RenderTankMethod } from '../interfaces/Interfaces';
+import { BuilderOptions, TankOptions, Tank, TankBuilderOptions, RenderTankMethod, Direction } from '../interfaces/Interfaces';
+
 
 export class TankBuilder {
 	private cW: number;
@@ -12,9 +13,11 @@ export class TankBuilder {
 	private giveBuilderDefaults(builderOpts: BuilderOptions, objectOpts: TankOptions): { 
 		dx: number, dy: number, sx: number, sy: number, sa: number } {
 		const s = objectOpts?.size ?? 5;
+		const isHorizontal = this.isHorizontal(builderOpts?.dir || '');
+		console.log(builderOpts);
 		return {
-			dx: builderOpts.dx ? builderOpts.dx + s * 14 : s * 14,
-			dy: builderOpts.dy ? builderOpts.dy + s * 11 : s * 11,
+			dx: builderOpts.dx ? isHorizontal ? builderOpts.dx + s*14  :  builderOpts.dx : s * 14,
+			dy: builderOpts.dy ? builderOpts.dy : isHorizontal ? s * 14 : 0,
 			sx: builderOpts.sx || 0,
 			sy: builderOpts.sy || 0,
 			sa: builderOpts.sa || 0
@@ -26,7 +29,7 @@ export class TankBuilder {
 			...objectOpts,
 			id: `${objectOpts.id || 'tank'}_${new Date().getTime()}`,
 			position: { x: positionX, y: positionY },
-			angle: angle
+			angle: angle,
 		};
 	}
 
@@ -52,19 +55,20 @@ export class TankBuilder {
 		const hasY = builderOpts?.y !== undefined && builderOpts.y > -1;
 		//console.log(hasX, hasY, builderOpts.x)
 
+		
 		// Set the starting position based on the direction specified in builderOpts
 		if (builderOpts.dir === 'down') {
 			position.y = this.cH + (tankOpts.size || 0) * 14; // Position below canvas
-			position.x = hasX ? Number(builderOpts.x) : this.cW / 2 - (tankOpts.size || 0) * 7;
+			position.x = hasX ? Number(builderOpts.x) : 0;
 		} else if (builderOpts.dir === 'up') {
 			position.y = -(tankOpts.size || 0) * 14; // Position above canvas
-			position.x = hasX ? Number(builderOpts.x) : this.cW / 2 - (tankOpts.size || 0) * 7;
+			position.x = hasX ? Number(builderOpts.x) : 0;
 		} else if (builderOpts.dir === 'left') {
 			position.x = -(tankOpts.size || 0) * 14; // Position to the left of canvas
-			position.y = hasY ? Number(builderOpts.y) : this.cH / 2 - (tankOpts.size || 0) * 7;
+			position.y = hasY ? Number(builderOpts.y) : this.cH / 2;
 		} else if (builderOpts.dir === 'right') {
 			position.x = this.cW + (tankOpts.size || 0) * 14; // Position to the right of canvas
-			position.y = hasY ? Number(builderOpts.y) : this.cH / 2 - (tankOpts.size || 0) * 7;
+			position.y = hasY ? Number(builderOpts.y) : this.cH / 2;
 		}
 
 		return position;
@@ -76,8 +80,8 @@ export class TankBuilder {
 		let num = builderOpts.num || 1;
 
 		let { x: positionX, y: positionY } = this.decideStartPosition(builderOpts, tankOpts);
+	
 		let angle = tankOpts.angle ?? 0;
-
 
 		//console.log( positionX, positionY);
 		for (let i = 0; i < num; i++) {
@@ -88,7 +92,6 @@ export class TankBuilder {
 			const [newPositionX, newPositionY] = this.calculateNewPosition(dx, dy, angle, positionX, positionY);
 			positionX = newPositionX;
 			positionY = newPositionY;
-
 			[dx, dy] = this.applyDisplacementFactor(dx, dy, sx, sy);
 
 			angle += sa;
@@ -98,25 +101,45 @@ export class TankBuilder {
 
 	}
 
-	giveTanksFromTheRight( renderMethod: RenderTankMethod, frameInterval: number = 1000, repetitions: number = 1, builderOpts?: BuilderOptions, tankOpts?: TankOptions): 
+	private isHorizontal(dir:string): boolean {
+		return (dir === 'left' || dir === 'right');
+	}
+
+	private getCannonAngle(dir: Direction): number {
+		let obj = {
+			left: 0,
+      right: 180,
+      up: 270,
+      down: 0
+		}
+		return obj[dir];
+
+	}
+
+	giveTanksFromTheSide( renderMethod: RenderTankMethod, frameInterval: number = 1000, repetitions: number = 1, builderOpts?: BuilderOptions, tankOpts?: TankOptions): 
 		TankBuilderOptions {
 
 		const tanksNum: number = builderOpts?.num || 2;
 		const tankSize: number = tankOpts?.size || 5;
-		const dy = (tanksNum !== 1) ?  Math.round( this.cH / (tanksNum -1 )) : this.cH/2
+		const dir: Direction = builderOpts?.dir ?? 'right';
+		const isHorizontal: boolean = this.isHorizontal(dir);
+		const dd = isHorizontal ? ( (tanksNum !== 1) ?  Math.round( this.cH / (tanksNum -1 )) : this.cH/2 ) :
+															( (tanksNum !== 1) ?  Math.round( this.cW / (tanksNum -1 )) : this.cW/2 );
+		           
+		
 
+															
 		return {
 			buildTankMethod: 'giveTeamOfTanks',
 			builderOpts: { 
-				dir: 'right', 
 				y: tanksNum === 1 ? Math.round(this.cH/2) : 0,  
-				dy: dy,
-				dx: -tankSize * 14,
+				dy: isHorizontal ? dd : 0,
+				dx: isHorizontal ? -(tankSize * 14 ): dd,
 				num: tanksNum, 
 				sa: 0, 
 				...builderOpts
 			},
-			tankOpts: this[renderMethod]({cannonAngle: 180, ...tankOpts}),
+			tankOpts: this[renderMethod]({cannonAngle: this.getCannonAngle(dir), ...tankOpts}),
 			frameInterval: frameInterval === 0 ? 999999 : frameInterval,
 			repetitions: repetitions
 		}
@@ -124,9 +147,9 @@ export class TankBuilder {
 
 	/** TANK TYPES ********************************************************************************* */
 
-	private veryLightTank(tankOpts: TankOptions = { size: 4 }): TankOptions {
+	private veryLightTank(tankOpts: TankOptions = { size: 3 }): TankOptions {
 		return {
-			size: 4,
+			size: 3,
 			speed: 2,
 			bodyFill: '#f7b264',            // Light orange
 			cannonFill: '#b5803d',          // Medium brown
@@ -142,9 +165,9 @@ export class TankBuilder {
 		};
 	}
 	
-	private lightTank(tankOpts: TankOptions = { size: 5 }): TankOptions {
+	private lightTank(tankOpts: TankOptions = { size: 4 }): TankOptions {
 		return {
-			size: 5,
+			size: 4,
 			speed: 1.8,
 			bodyFill: '#c9a252',            // Light brownish yellow
 			cannonFill: '#5a5e9e',          // Slate blue
@@ -160,9 +183,9 @@ export class TankBuilder {
 		};
 	}
 	
-	private mediumTank(tankOpts: TankOptions = { size: 6 }): TankOptions {
+	private mediumTank(tankOpts: TankOptions = { size: 5 }): TankOptions {
 		return {
-			size: 8,
+			size: 5,
 			speed: 1.2,
 			bodyFill: '#7f8a5b',            // Olive green
 			cannonFill: '#3e2e15',          // Dark brown
@@ -178,9 +201,9 @@ export class TankBuilder {
 		};
 	}
 	
-	private heavyTank(tankOpts: TankOptions = { size: 7 }): TankOptions {
+	private heavyTank(tankOpts: TankOptions = { size: 6 }): TankOptions {
 		return {
-			size: 10,
+			size: 6,
 			speed: 0.8,
 			bodyFill: '#4b4b4b',            // Dark gray
 			cannonFill: '#2a1e0b',          // Very dark brown
