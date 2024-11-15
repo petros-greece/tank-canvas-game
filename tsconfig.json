@@ -11,6 +11,7 @@
   "module": "ESNext",
   "moduleResolution": "node",
   "outDir": "./dist",
+  "rootDir": "./src", // Source folder for .ts files
   "esModuleInterop": true,
   "strict": true,
   "resolveJsonModule": true,

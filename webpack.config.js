@@ -1,5 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.ts',  // Your entry file
@@ -18,6 +20,10 @@ module.exports = {
         use: 'ts-loader',  // Use ts-loader for TypeScript
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
   devServer: {
@@ -29,27 +35,15 @@ module.exports = {
       overlay: true, // Show error overlay in the browser
     },
     watchFiles: {
-      paths: ['src/**/*', 'index.html', 'dist/**/*'],  // Watch for changes in index.html and the src folder
+      paths: ['src/**/*'],  // Watch for changes in index.html and the src folder
     },
   },
-  // devServer: {
-  //   static: {
-  //     directory: './',  // Serve files from the `dist` directory
-  //   },
-  //   hot: true,  // Enable Hot Module Replacement
-  //   open: true,  // Automatically open the browser
-  //   watchFiles: {
-  //     paths: ['src/**/*', 'index.html', 'dist/**/*'],  // Watch for changes in index.html and the src folder
-  //   },
-  //   watchOptions: {
-  //     ignored: /node_modules/,
-  //     poll: 1000,
-  //   },
-  //   port: 8080,  // Set port to 8080 (or any other port you prefer)
-  //   historyApiFallback: true,  // For SPA routing (redirects 404s to index.html)
-  // },
   plugins: [
     new webpack.HotModuleReplacementPlugin(), // HMR Plugin
+    new HtmlWebpackPlugin({
+      template: './src/index.html', // Source HTML file
+      filename: './index.html', // Output HTML file
+    }),
   ],
   mode: 'development',  // Set mode to development for better performance during development
 };
