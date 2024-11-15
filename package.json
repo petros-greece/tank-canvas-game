@@ -1,7 +1,9 @@
 {
   "devDependencies": {
     "@types/fabric": "^5.3.9",
+    "html-webpack-plugin": "^5.6.3",
     "nodemon": "^3.1.7",
+    "npm-run-all": "^4.1.5",
     "ts-loader": "^9.5.1",
     "tsc-alias": "^1.8.10",
     "typescript": "^5.6.3",
@@ -11,8 +13,10 @@
   },
   "scripts": {
     "build": "webpack",
-    "start": "webpack serve --open",
-    "dev": "webpack serve --config ./webpack.config.js --hot && npx tailwindcss -i ./src/css/styles.css -o ./dist/styles.css --watch"
+    "watch": "webpack --watch",
+    "dev": "webpack serve",
+    "tailwind:watch": "npx tailwindcss -i ./src/css/styles.css -o ./dist/styles.css --watch",
+    "start": "npm-run-all --parallel dev tailwind:watch"
   },
   "dependencies": {
     "fabric": "^6.5.0"

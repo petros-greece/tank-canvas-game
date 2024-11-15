@@ -1,49 +1,48 @@
 const path = require('path');
 const webpack = require('webpack');
-const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.ts',  // Your entry file
+  entry: './src/index.ts', // Your main TypeScript entry file
   output: {
-    filename: 'bundle.js',  // Output bundle file
+    filename: 'bundle.js', // Name of the output JS bundle
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/', // Ensure the assets are served correctly from the root
+    publicPath: '/', // Ensure assets are served correctly from the root
   },
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.ts', '.js'], // Automatically resolve these extensions
   },
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        use: 'ts-loader',  // Use ts-loader for TypeScript
-        exclude: /node_modules/,
+        test: /\.ts$/, // Match TypeScript files
+        use: 'ts-loader', // Use ts-loader for TypeScript
+        exclude: /node_modules/, // Exclude node_modules
       },
       {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+        test: /\.css$/, // Match CSS files
+        use: ['style-loader', 'css-loader', 'postcss-loader'], // Enable TailwindCSS processing
       },
     ],
   },
   devServer: {
     static: path.join(__dirname, 'dist'), // Serve files from 'dist'
-    hot: true, // Enable HMR
+    hot: true, // Enable Hot Module Replacement
     open: true, // Automatically open the browser
-    historyApiFallback: true, // Allow navigation in single-page apps
+    historyApiFallback: true, // Handle SPA routing
     client: {
-      overlay: true, // Show error overlay in the browser
+      overlay: true, // Show errors and warnings in the browser overlay
     },
     watchFiles: {
-      paths: ['src/**/*'],  // Watch for changes in index.html and the src folder
+      paths: ['src/**/*'], // Watch for changes in src folder
     },
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(), // HMR Plugin
+    new webpack.HotModuleReplacementPlugin(), // HMR plugin for live updates
     new HtmlWebpackPlugin({
       template: './src/index.html', // Source HTML file
       filename: './index.html', // Output HTML file
     }),
   ],
-  mode: 'development',  // Set mode to development for better performance during development
+  mode: 'development', // Set mode to development
 };
