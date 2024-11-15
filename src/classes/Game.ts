@@ -7,6 +7,7 @@ import { TankOptions, StageOptions, ObjectOptions, BuilderOptions, PublicMethodN
 import { detectCollision, checkIfClicked }  from "../helpers";
 import { Stage } from "./Stage";
 
+
 export class Game extends Stage {
 
   team: string;
@@ -70,6 +71,7 @@ export class Game extends Stage {
     this.interval = setInterval(() => {
       ctx.clearRect(0, 0, cW, cH);
       this.frame += 1;
+
       if( !(this.frame%100) ){
         //console.log('Checking for entries');
         this.checkForStageNewEntries();
@@ -208,6 +210,9 @@ export class Game extends Stage {
   addMissile(missile: Missile): void {
     this.missiles.push(missile);
   }
+
+
+
 
 
 }

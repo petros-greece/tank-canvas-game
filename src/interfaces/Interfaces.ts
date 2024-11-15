@@ -145,6 +145,7 @@ export interface ObjectOptions {
     angle?: number;
     isBreakable?: boolean;
     team?: string;
+    armor?: number;
 }
 
 export type WorldBuilderOptions = {
@@ -238,6 +239,7 @@ export interface Game {
     tanks: any[];
     addMissile: (missile: Missile) => void;
 }
+
 
 
 

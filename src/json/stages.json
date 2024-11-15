@@ -15,7 +15,7 @@
 				"builderOpts": {
 					"type": "sequence",
 					"num": 5,
-					"dir": "down"
+					"dir": "up"
 				}
 			}
 		]

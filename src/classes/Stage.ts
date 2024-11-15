@@ -5,6 +5,7 @@ import { TankBuilder } from "./TankBuilder";
 import { Tank } from "./Tank";
 import { Missile } from "./Missile";
 import { StageOptions, TankBuilderOptions } from "../interfaces/Interfaces";
+import { FabricLayer } from "./FabricLayer";
 
 export class Stage {
   public ctx: CanvasRenderingContext2D;
@@ -106,6 +107,11 @@ export class Stage {
     this.giveObjects(stageOptions);
     this.giveTanks(stageOptions);
     this.giveTankBuilders(stageOptions);
+
+    const l = new FabricLayer('fabricLayer');
+    let objs = l.transormAllObjectsToGameObjects(this.ctx);
+    this.worldObjects = objs;
+
   }
 
   /********************************************************************************** */

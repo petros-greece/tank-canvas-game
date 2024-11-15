@@ -1,20 +1,31 @@
 import { Game } from './classes/Game';
 
-// Get the canvas element and its context
-const canvas = document.getElementById("tankCanvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+import { FabricLayer } from './classes/FabricLayer';
 
-// Function to resize the canvas based on window size
-function resizeCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+
+
+const fabricCanvas = document.getElementById("fabricLayer") as HTMLCanvasElement;
+const tankCanvas = document.getElementById("tankCanvas") as HTMLCanvasElement;
+const ctx = tankCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+// const l = new FabricLayer('fabricLayer');
+// l.addRectangle();
+
+function resizeCanvas() {
+  tankCanvas.width = window.innerWidth;
+  tankCanvas.height = window.innerHeight;
+  fabricCanvas.width = window.innerWidth;
+  fabricCanvas.height = window.innerHeight;
 }
 
-// Call the resize function initially
-resizeCanvas(canvas, ctx);
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
-let game = new Game(canvas);
+
+let game = new Game(tankCanvas);
 game.attachEvents();
 game.run();
+
+
 
 

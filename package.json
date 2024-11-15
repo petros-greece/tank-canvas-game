@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/fabric": "^5.3.9",
     "nodemon": "^3.1.7",
     "ts-loader": "^9.5.1",
     "tsc-alias": "^1.8.10",
@@ -12,5 +13,8 @@
     "build": "webpack",
     "start": "webpack serve --open",
     "dev": "webpack-dev-server --config ./webpack.config.js --hot"
+  },
+  "dependencies": {
+    "fabric": "^6.5.0"
   }
 }
