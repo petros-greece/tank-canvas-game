@@ -34,7 +34,7 @@ module.exports = {
       overlay: true, // Show errors and warnings in the browser overlay
     },
     watchFiles: {
-      paths: ['src/**/*'], // Watch for changes in src folder
+      paths: ['src/**/*', 'src/index.html'], // Watch for changes in src folder
     },
   },
   plugins: [
